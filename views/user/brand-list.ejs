@@ -1,0 +1,43 @@
+<%- include('../partials/user/header') %>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<main class="main">
+    <section class="brand-tabs section-padding position-relative wow fadeIn animated">
+        <div class="container">
+            <h3 class="section-title mb-20"><span>All</span> Brands</h3>
+
+            <!-- Sorting and Filtering -->
+
+            <!-- Brands Grid -->
+            <div class="tab-content wow fadeIn animated" id="myTabContent">
+                <div class="row brand-grid-4" id="brands-container">
+                    <% for(let i=0; i < brands.length; i++) { %>
+                        <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                            <div class="brand-card-wrap mb-30">
+                                <div class="brand-img-action-wrap">
+                                    <div class="brand-img brand-img-zoom" style="width: 250px; height: 250px;">
+                                        <a href="/branddetails?id=<%= brands[i]._id %>">
+                                            <img class="default-img" src="/uploads/re-image/<%= brands[i].brandImage %>" alt="<%= brands[i].brandName %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                        </a>
+                                    </div>
+                                </div><br>
+                                <div class="brand-content-wrap">
+                                    <h5><%= brands[i].brandName %></h5><br>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        
+    </section>
+</main>
+
+<script>
+    
+</script>
+<%- include('../partials/user/footer') %>

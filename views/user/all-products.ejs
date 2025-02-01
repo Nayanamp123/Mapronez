@@ -1,0 +1,193 @@
+<%- include('../partials/user/header') %>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<main class="main">
+    <section class="product-tabs section-padding position-relative wow fadeIn animated">
+        <div class="container">
+            <h3 class="section-title mb-20"><span>All</span> Products</h3>
+
+            <div class="tab-header">
+                <div class="sorting-container">
+                    <label for="sort-by" class="sort-label">Sort by:</label>
+                    <select id="sort-by" class="sort-select" onchange="handleSortChange()">
+                        <option value="default">Default</option>
+                        <option value="popularity">Popularity</option>
+                        <option value="price-low-high">Price: Low to High</option>
+                        <option value="price-high-low">Price: High to Low</option>
+                        <option value="rating">Average Rating</option>
+                        <option value="new-arrivals">New Arrivals</option>
+                        <option value="alphabetical-a-z">Alphabetical (A-Z)</option>
+                        <option value="alphabetical-z-a">Alphabetical (Z-A)</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="cat-filter" class="sort-select" onchange="catFilter()">
+                        <option value="all-categories">All Categories</option>
+                        <% for(let i=0; i < cat.length; i++) { %>
+                            <option value="<%= cat[i]._id %>">
+                                <%= cat[i].name %>
+                            </option>
+                        <% } %>
+                    </select>
+                </div>
+            </div><br><br>
+
+            <div class="tab-content wow fadeIn animated" id="myTabContent">
+                <div class="row product-grid-4" id="products-container">
+                    <% for(let i=0; i < products.length; i++) { %>
+                        <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                            <div class="product-cart-wrap mb-30">
+                                <div class="product-img-action-wrap">
+                                    <div class="product-img product-img-zoom">
+                                        <a href="/productdetails?id=<%= products[i]._id %>">
+                                            <img class="default-img" src="/uploads/re-image/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>">
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="product-content-wrap">
+                                    <h5><%= products[i].productName %></h5><br>
+                                    <div class="d-flex">
+                                        <h5 class="pe-3">₹<%= products[i].salePrice.toLocaleString() %></h5>
+                                        <h6 class="text pe-3" style="text-decoration: line-through; color: rgb(164, 103, 103);">₹<%=products[i].regularPrice.toLocaleString()%></h6>
+                                    </div>
+                                    <p>Rating: <%= products[i].rating !== undefined ? products[i].rating : 'N/A' %></p>
+                                    <% if (products[i].quantity > 0) { %>
+                                        <span class="text-success"><%= products[i].quantity %> stocks left</span>
+                                    <% } else { %>
+                                        <span class="text-danger">Out of Stock</span>
+                                    <% } %>                                    
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        <!-- Pagination Component -->
+            <div class="pagination-area mt-15 mb-50 container">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-start">
+                        <!-- Previous Button -->
+                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                            <a class="page-link d-flex justify-content-center align-items-center" 
+                            href="<%= currentPage === 1 ? '#' : `?page=${currentPage - 1}` %>"
+                            <%= currentPage === 1 ? 'aria-disabled="true"' : '' %>>
+                                <span class="material-icons">chevron_left</span>
+                            </a>
+                        </li>
+
+                        <!-- Page Numbers -->
+                        <% 
+                        let startPage = Math.max(1, currentPage - 2);
+                        let endPage = Math.min(totalPages, startPage + 4);
+                        
+                        if (endPage - startPage < 4) {
+                            startPage = Math.max(1, endPage - 4);
+                        }
+                        
+                        if (startPage > 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">1</a>
+                            </li>
+                            <% if (startPage > 2) { %>
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            <% } %>
+                        <% } %>
+
+                        <% for(let i = startPage; i <= endPage; i++) { %>
+                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                            </li>
+                        <% } %>
+
+                        <% if (endPage < totalPages) { %>
+                            <% if (endPage < totalPages - 1) { %>
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            <% } %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= totalPages %>"><%= totalPages %></a>
+                            </li>
+                        <% } %>
+
+                        <!-- Next Button -->
+                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                            <a class="page-link d-flex justify-content-center align-items-center" 
+                            href="<%= currentPage === totalPages ? '#' : `?page=${currentPage + 1}` %>"
+                            <%= currentPage === totalPages ? 'aria-disabled="true"' : '' %>>
+                                <span class="material-icons">chevron_right</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+    </section>
+</main>
+
+<script>
+    function catFilter() {
+        const selectedCategory = document.getElementById('cat-filter').value;
+
+        fetch(`/filter-by-category?category=${selectedCategory}`, {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                updateProductList(data.products);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function handleSortChange() {
+        const sortBy = document.getElementById('sort-by').value;
+
+        fetch(`/sort?sort=${sortBy}`, {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                updateProductList(data.products);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function updateProductList(products) {
+        const productsContainer = document.getElementById('products-container');
+        productsContainer.innerHTML = '';
+
+        if (products.length === 0) {
+            productsContainer.innerHTML = '<p>No products found.</p>';
+            return;
+        }
+
+        products.forEach(product => {
+            const productHTML = `
+                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                    <div class="product-cart-wrap mb-30">
+                        <div class="product-img-action-wrap">
+                            <div class="product-img product-img-zoom">
+                                <a href="/productdetails?id=${product._id}">
+                                    <img class="default-img" src="/uploads/re-image/${product.productImage[0]}" alt="${product.productName}">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="product-content-wrap">
+                            <h6>${product.productName}</h6>
+                            <h5>₹${product.salePrice.toLocaleString()}</h5>
+                            <h6 style="text-decoration: line-through; color: rgb(164, 103, 103);">₹${product.regularPrice.toLocaleString()}</h6>
+                            <p>Rating: ${product.rating !== undefined ? product.rating : 'N/A'}</p>
+                            ${product.quantity > 0
+                    ? `<span class="text-success">${product.quantity} stocks left</span>`
+                    : `<span class="text-danger">Out of Stock</span>`}
+                        </div>
+                    </div>
+                </div>
+            `;
+            productsContainer.insertAdjacentHTML('beforeend', productHTML);
+        });
+    }
+</script>
+<%- include('../partials/user/footer') %>

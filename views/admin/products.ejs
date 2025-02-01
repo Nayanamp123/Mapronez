@@ -1,0 +1,192 @@
+<%- include("../../views/partials/admin/header") %>
+
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+</head>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Products List</h2>
+        </div>
+        <div>
+            <a href="/admin/addproduct" class="btn btn-primary btn-sm rounded">Create new</a>
+        </div>
+    </div>
+
+    <header class="card-header text-center mb-4">
+        <form action="" method="get" class="d-inline">
+            <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px;">
+                <input type="text" class="form-control border-0 rounded-pill" placeholder="Search products or brands" name="search">
+                <button class="btn border-0" type="submit">Search</button>
+            </div>
+        </form>
+    </header>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col"><b>Product name</b></th>
+                        <th scope="col"><b>Brand</b></th>
+                        <th scope="col"><b>Category</b></th>
+                        <th scope="col"><b>Quantity</b></th>
+                        <th scope="col"><b>Sale Price</b></th>
+                        <th scope="col"><b>Offer Price</b></th>
+                        <th scope="col"><b>Offer Status</b></th>
+                        <th scope="col"><b></b></th>
+                        <th scope="col"><b>Action</b></th>
+                        <th scope="col"><b>Edit</b></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%for(let i=data.length-1;i>=0;i--){%>
+                        <tr>
+                            <td><%=data[i].productName %></td>
+                            <td><%=data[i].brand %></td>
+                            <td><%=data[i].category.name %></td>
+                            <td><%=data[i].quantity%></td>
+                            <td>₹<%=data[i].salePrice.toLocaleString() %></td>
+                            <td>
+                                <%if(data[i].productOffer){%>
+                                    <%=data[i].productOffer%>%
+                                <%}else{%>
+                                   0% 
+                                <%}%>
+                            </td>
+                            <td>
+                                <%if(data[i].productOffer){%>
+                                    <span class="badge rounded-pill alert-success">Active</span>
+                                <%}else{%>
+                                    <span class="badge rounded-pill alert-danger">No active offer</span>
+                                <%}%>
+                            </td>
+                            <td>
+                                <%if(data[i].productOffer){%>
+                                    <button class="btn btn-primary" style="width: 150px;" onclick="removeOffer('<%=data[i]._id%>')">
+                                        <a href="#" class="text-white">Remove</a>
+                                    </button>
+                                <%}else{%>
+                                    <button class="btn btn-primary" style="width: 150px;" onclick="addOffer('<%=data[i]._id%>')">
+                                        <a href="#" class="text-white">Add Offer</a>
+                                    </button>
+                                <%}%>
+                            </td>
+                            <td>
+                                <%if(data[i].isBlocked){%>
+                                    <button class="btn btn-success" style="width: 150px;">
+                                        <a href="/admin/unblockproduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Unblock</a>
+                                    </button>
+                                <%}else{%>
+                                    <button class="btn btn-danger" style="width: 150px;">
+                                        <a href="/admin/blockproduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Block</a>
+                                    </button>
+                                <%}%>
+                            </td>
+                            <td>
+                                <button class="btn" style="width: 150px; background-color: blue;">
+                                    <a href="/admin/editproduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Edit</a>
+                                </button>
+                            </td>
+                        </tr>
+                    <%}%>
+                    <!-- Repeat similar rows as needed -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="pagination-area mt-30 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <%for(let i=1;i<=totalPages;i++){%>
+                    <li class="page-item">
+                        <a class="page-link <%= (i===currentPage) ? 'active' : '' %>" href="?page=<%=i%>"><%=i%></a>
+                    </li>
+                <%}%>
+            </ul>
+        </nav>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script>
+
+async function addOffer(productId) {
+    const { value: amount } = await Swal.fire({
+        title: 'Offer in percentage',
+        input: 'number',
+        inputLabel: 'Percentage',
+        inputPlaceholder: '%',
+        showCancelButton: true
+    });
+
+    if (amount) {
+        $.ajax({
+            url: "/admin/addproductoffer",
+            method: "post",
+            data: {
+                percentage: amount,
+                productId: productId
+            },
+            success: (response) => {
+                if (response.status === true) {
+                    location.reload();
+                    Swal.fire('Offer added', 'The offer has been added', 'success');
+                } else {
+                    Swal.fire('Failed', 'Failed to add the offer', 'error');
+                }
+            },
+            error: (error) => {
+                Swal.fire('Error', 'Something went wrong', 'error');
+            }
+        });
+    }
+}
+
+async function removeOffer(productId) {
+    try {
+        Swal.fire({
+            title: "Remove offer",
+            text: "Are you sure you want to remove the offer?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: "Remove",
+            timer: 5000,
+            timerProgressBar: true
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/admin/removeproductoffer',
+                    method: 'post',
+                    data: {
+                        productId: productId
+                    },
+                    success: (response) => {
+                        if (response.status === true) {
+                            Swal.fire("Removed!", "The offer has been removed", "success");
+                            location.reload();
+                        } else {
+                            Swal.fire("Failed", "Failed to remove the offer", "error");
+                        }
+                    },
+                    error: (error) => {
+                        Swal.fire('Error', 'Something went wrong', 'error');
+                    }
+                });
+            }
+        });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

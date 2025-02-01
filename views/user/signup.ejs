@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Signup - eCommerce</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="evara-frontend/assets/imgs/theme/favicon.svg">
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="evara-frontend/assets/css/main.css?v=3.4">
+    <style>
+        .error-message {
+            color: red;
+            font-size: 14px;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .gsi-material-button {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -webkit-appearance: none;
+            background-color: #f2f2f2;
+            background-image: none;
+            border: none;
+            -webkit-border-radius: 20px;
+            border-radius: 20px;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            color: #1f1f1f;
+            cursor: pointer;
+            font-family: 'Roboto', arial, sans-serif;
+            font-size: 14px;
+            height: 40px;
+            letter-spacing: 0.25px;
+            outline: none;
+            overflow: hidden;
+            padding: 0 12px;
+            position: relative;
+            text-align: center;
+            -webkit-transition: background-color .218s, border-color .218s, box-shadow .218s;
+            transition: background-color .218s, border-color .218s, box-shadow .218s;
+            vertical-align: middle;
+            white-space: nowrap;
+            width: auto;
+            max-width: 400px;
+            min-width: min-content;
+        }
+
+        .gsi-material-button .gsi-material-button-icon {
+            height: 20px;
+            margin-right: 12px;
+            min-width: 20px;
+            width: 20px;
+        }
+
+        .gsi-material-button .gsi-material-button-content-wrapper {
+            -webkit-align-items: center;
+            align-items: center;
+            display: flex;
+            -webkit-flex-direction: row;
+            flex-direction: row;
+            -webkit-flex-wrap: nowrap;
+            flex-wrap: nowrap;
+            height: 100%;
+            justify-content: space-between;
+            position: relative;
+            width: 100%;
+        }
+
+        .gsi-material-button .gsi-material-button-contents {
+            -webkit-flex-grow: 1;
+            flex-grow: 1;
+            font-family: 'Roboto', arial, sans-serif;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: top;
+        }
+
+        .gsi-material-button .gsi-material-button-state {
+            -webkit-transition: opacity .218s;
+            transition: opacity .218s;
+            bottom: 0;
+            left: 0;
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+
+        .gsi-material-button:disabled {
+            cursor: default;
+            background-color: #ffffff61;
+        }
+
+        .gsi-material-button:disabled .gsi-material-button-state {
+            background-color: #1f1f1f1f;
+        }
+
+        .gsi-material-button:disabled .gsi-material-button-contents {
+            opacity: 38%;
+        }
+
+        .gsi-material-button:disabled .gsi-material-button-icon {
+            opacity: 38%;
+        }
+
+        .gsi-material-button:not(:disabled):active .gsi-material-button-state,
+        .gsi-material-button:not(:disabled):focus .gsi-material-button-state {
+            background-color: #001d35;
+            opacity: 12%;
+        }
+
+        .gsi-material-button:not(:disabled):hover {
+            -webkit-box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+            box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+        }
+
+        .gsi-material-button:not(:disabled):hover .gsi-material-button-state {
+            background-color: #001d35;
+            opacity: 8%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="pt-150 pb-150">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 m-auto">
+                    <div class="login_wrap widget-taber-content p-30 background-white border-radius-5">
+                        <div class="padding_eight_all bg-white">
+                            <div class="heading_s1">
+                                <h3 class="mb-30">Create an Account</h3>
+                            </div>
+                            <p class="mb-50 font-sm">
+                                Your personal data will be used to support your experience throughout this website, to
+                                manage access to your account, and for other purposes described in our privacy policy.
+                            </p>
+                            <form id="signupForm" method="post" action="/signup" onsubmit="return validateForm()">
+                                <div class="form-group">
+                                    <input type="text" name="username" id="username" placeholder="Full Name">
+                                    <span id="usernameError" class="error-message"></span>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" name="email" id="email" placeholder="Email">
+                                    <span id="emailError" class="error-message"></span>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" name="phone" id="phone" placeholder="Phone">
+                                    <span id="phoneError" class="error-message"></span>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" name="referal" id="referal" placeholder="Referal Code">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" name="password" id="password" placeholder="Password">
+                                    <span id="passwordError" class="error-message"></span>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" name="cpassword" id="cpassword"
+                                        placeholder="Confirm Password">
+                                    <span id="cpasswordError" class="error-message"></span>
+                                </div>
+                                <%if(locals.message && message.length>0){%>
+                                    <div class="alert alert-danger text-center">
+                                        <%=message%>
+                                    </div>
+                                    <%}%>
+                                        <div class="login_footer form-group">
+                                            <div class="chek-form">
+                                                <div class="custome-checkbox">
+                                                    <input class="form-check-input" type="checkbox" name="terms"
+                                                        id="terms">
+                                                    <label class="form-check-label" for="terms"><span>I agree to terms
+                                                            &amp; Policy.</span></label>
+                                                </div>
+                                            </div>
+                                            <span id="termsError" class="error-message"></span>
+                                            <a href="page-privacy-policy.html"><i
+                                                    class="fi-rs-book-alt mr-5 text-muted"></i>Learn more</a>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-fill-out btn-block hover-up"
+                                                name="signup">Submit &amp; Register</button>
+                                        </div>
+                            </form>
+                            <div class="divider-text-center mt-15 mb-15">
+                                <span>or</span>
+                            </div>
+                            <a href="/auth/google">
+                                <button class="gsi-material-button">
+                                    <div class="gsi-material-button-state"></div>
+                                    <div class="gsi-material-button-content-wrapper">
+                                        <div class="gsi-material-button-icon">
+                                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"
+                                                xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
+                                                <path fill="#EA4335"
+                                                    d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                                                </path>
+                                                <path fill="#4285F4"
+                                                    d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                                                </path>
+                                                <path fill="#FBBC05"
+                                                    d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                                                </path>
+                                                <path fill="#34A853"
+                                                    d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                                                </path>
+                                                <path fill="none" d="M0 0h48v48H0z"></path>
+                                            </svg>
+                                        </div>
+                                        <span class="gsi-material-button-contents">Continue with Google</span>
+                                        <span style="display: none;">Continue with Google</span>
+                                    </div>
+                                </button>
+                            </a>
+                            <div class="text-muted text-center mt-15">Already have an account? <a href="/login">Sign in
+                                    now</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vendor JS -->
+    <script src="evara-frontend/assets/js/vendor/jquery-3.6.0.min.js"></script>
+    <script src="evara-frontend/assets/js/vendor/bootstrap.bundle.min.js"></script>
+    <!-- Template JS -->
+    <script src="evara-frontend/assets/js/main.js?v=3.4"></script>
+
+    <!-- JavaScript Validation -->
+    <script>
+        function validateForm() {
+            let isValid = true;
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const cpassword = document.getElementById('cpassword').value.trim();
+            const terms = document.getElementById('terms').checked;
+
+            // Email pattern validation
+            const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+
+            // Clear previous errors
+            document.getElementById('usernameError').textContent = '';
+            document.getElementById('emailError').textContent = '';
+            document.getElementById('phoneError').textContent = '';
+            document.getElementById('passwordError').textContent = '';
+            document.getElementById('cpasswordError').textContent = '';
+            document.getElementById('termsError').textContent = '';
+
+            if (!username) {
+                document.getElementById('usernameError').textContent = 'Username is required';
+                isValid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(username)) {
+                document.getElementById('usernameError').textContent = 'Username can only contain letters (no numbers or special characters)';
+                isValid = false;
+            } else if (username.length < 2) {
+                document.getElementById('usernameError').textContent = 'Username must be at least 2 characters long';
+                isValid = false;
+            } else if (username.length > 30) {
+                document.getElementById('usernameError').textContent = 'Username cannot exceed 30 characters';
+                isValid = false;
+            }
+
+            // Email validation
+            if (email === "" || !emailPattern.test(email)) {
+                document.getElementById('emailError').textContent = "Please enter a valid email";
+                isValid = false;
+            }
+
+            // Phone validation
+            if (phone === "") {
+                document.getElementById('phoneError').textContent = "Phone number is required";
+                isValid = false;
+            }
+
+            // Password validation with strength checks
+            if (password === "") {
+                document.getElementById('passwordError').textContent = "Password is required";
+                isValid = false;
+            } else {
+                // Password strength criteria
+                const minLength = 8;
+                // const hasUpperCase = /[A-Z]/.test(password);
+                // const hasLowerCase = /[a-z]/.test(password);
+                const hasNumbers = /\d/.test(password);
+                // const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+                let strengthErrors = [];
+
+                // Check each criteria
+                if (password.length < minLength) {
+                    strengthErrors.push("at least 8 characters");
+                }
+                if (!hasUpperCase) {
+                    strengthErrors.push("an uppercase letter");
+                }
+                if (!hasLowerCase) {
+                    strengthErrors.push("a lowercase letter");
+                }
+                if (!hasNumbers) {
+                    strengthErrors.push("a number");
+                }
+                if (!hasSpecialChar) {
+                    strengthErrors.push("a special character");
+                }
+
+                // If any criteria failed, show error message
+                if (strengthErrors.length > 0) {
+                    document.getElementById('passwordError').textContent =
+                        `Password must contain ${strengthErrors.join(", ")}`;
+                    isValid = false;
+                } else {
+                    document.getElementById('passwordError').textContent = "";
+                }
+            }
+
+            // Confirm Password validation
+            if (cpassword === "") {
+                document.getElementById('cpasswordError').textContent = "Please confirm your password";
+                isValid = false;
+            } else if (password !== cpassword) {
+                document.getElementById('cpasswordError').textContent = "Passwords do not match";
+                isValid = false;
+            } else {
+                document.getElementById('cpasswordError').textContent = "";
+            }
+
+            // Terms checkbox validation
+            if (!terms) {
+                document.getElementById('termsError').textContent = "You must agree to the terms and policy";
+                isValid = false;
+            }
+
+            // Return the final validation state
+            return isValid;
+        }
+    </script>
+</body>
+
+</html>

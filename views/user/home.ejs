@@ -1,0 +1,289 @@
+<%- include('../partials/user/header') %>
+<style>
+    .hero-slider-1 {
+    position: relative;
+    overflow: hidden;
+}
+
+.single-hero-slider {
+    position: relative;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.single-hero-slider .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Adjust transparency for visibility */
+    z-index: 1;
+}
+
+.text-content {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    text-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.text-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.text-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.text-content .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.text-content .btn:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.banner-link {
+    display: block;
+    text-decoration: none;
+}
+
+.slider-animated-1 {
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+</style>
+    <main class="main">
+        <section class="home-slider position-relative pt-50">
+
+            <div class="hero-slider-1 dot-style-1 dot-style-1-position-1">
+                <% for (let i = 0; i < banner.length; i++) { %>
+                    <a href="<%= banner[i].link %>" target="_blank" class="banner-link">
+                        <div class="single-hero-slider single-animation-wrap" style="background-image: url('uploads/re-image/<%= banner[i].image %>');">
+                            <div class="overlay"></div>
+                            <div class="container">
+                                <div class="row align-items-center slider-animated-1">
+                                    <div class="col-lg-5 col-md-6 text-content">
+                                        <h1 class="animated fadeInUp">
+                                            <%= banner[i].title %>
+                                        </h1>
+                                        <h3 class="animated fadeInUp" style="animation-delay: 0.3s;">
+                                            <%= banner[i].description %>
+                                        </h3>
+                                        <button class="btn btn-primary animated fadeInUp" style="animation-delay: 0.6s;">
+                                            Learn More
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                <% } %>
+            </div>
+            
+
+
+            <div class="slider-arrow hero-slider-1-arrow"></div>
+        </section><br>
+        <section class="product-tabs section-padding position-relative wow fadeIn animated">
+            <div class="container">
+                <div class="tab-header">
+                    <div class="sorting-container">
+                        <label for="sort-by" class="sort-label">Sort by:</label>
+                        <select id="sort-by" class="sort-select" onchange="handleSortChange()">
+                            <option value="default">Default</option>
+                            <option value="popularity">Popularity</option>
+                            <option value="price-low-high">Price: Low to High</option>
+                            <option value="price-high-low">Price: High to Low</option>
+                            <option value="rating">Average Rating</option>
+                            <option value="new-arrivals">New Arrivals</option>
+                            <option value="alphabetical-a-z">Alphabetical (A-Z)</option>
+                            <option value="alphabetical-z-a">Alphabetical (Z-A)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select id="cat-filter" class="sort-select" onchange="catFilter()">
+                            <option value="all-categories">All Categories</option>
+                            <%for(let i=0;i<cat.length;i++){%>
+                                <option value="<%=cat[i]._id%>">
+                                    <%=cat[i].name%>
+                                </option>
+                                <%}%>
+                        </select>
+                    </div>
+                </div><br><br>
+                <div class="container text-end"></div><br>
+                <!--End nav-tabs-->
+                <div class="tab-content wow fadeIn animated" id="myTabContent">
+                    <div class="tab-pane fade show active" id="tab-one" role="tabpanel" aria-labelledby="tab-one">
+                        <div class="row product-grid-4" id="products-container">
+                            <% for (let i=0; i < products.length; i++) { %>
+                                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                    <div class="product-cart-wrap mb-30">
+                                        <div class="product-img-action-wrap">
+                                            <div class="product-img product-img-zoom">
+                                                <a href="/productdetails?id=<%= products[i]._id %>">
+                                                    <img class="default-img"
+                                                        src="/uploads/re-image/<%= products[i].productImage[0] %>"
+                                                        alt="<%= products[i].productName %>">
+                                                </a>
+                                            </div>
+                                            <!-- <div class="product-action-1">
+                                                <a aria-label="Add To Cart" class="action-btn hover-up"
+                                                    href="/add-to-cart?id=<%= products[i]._id %>"><i
+                                                        class="fi-rs-shopping-bag-add"></i></a>
+                                            </div> -->
+                                        </div>
+                                        <div class="product-content-wrap">
+                                            <h4>
+                                                <%= products[i].productName %>
+                                            </h4><br>
+                                            <div class="d-flex">
+                                                <h4 class="text pe-3">₹<%= products[i].salePrice.toLocaleString() %>
+                                                </h4>
+                                                <h6 class="text pe-3" style="text-decoration: line-through; color: rgb(164, 103, 103);">₹<%=products[i].regularPrice.toLocaleString()%></h6>
+                                                <h4><%=products[i].highestOffer%>%</h4>
+                                            </div>
+                                            <p>Rating: <%= products[i].rating !==undefined ? products[i].rating : 'N/A'
+                                                    %>
+                                            </p>
+                                            <%if(products[i].quantity>0){%>
+                                                <span class="text-success">
+                                                    <%=products[i].quantity%> stocks left
+                                                </span>
+                                                <%}else{%>
+                                                    <span class="text-danger">Out of Stock</span>
+                                                    <%}%>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% } %>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!--End tab-content-->
+            </div>
+            
+        </section>
+        <section class="popular-categories section-padding mt-15 mb-25">
+            <div class="container wow fadeIn animated">
+                <h3 class="section-title mb-20"><span>Popular</span> Categories</h3>
+                <div class="carausel-6-columns-cover position-relative">
+                    <div class="slider-arrow slider-arrow-2 carausel-6-columns-arrow" id="carausel-6-columns-arrows">
+                    </div>
+                    <div class="carausel-6-columns" id="carausel-6-columns">
+                        <%for(let i=0;i<cat.length;i++){%>
+                            <div class="card-1">
+                                <figure class=" img-hover-scale overflow-hidden">
+                                    <a href="#">
+                                        <%=cat[i].name%>
+                                    </a>
+                                </figure>
+                            </div>
+                            <%}%>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+
+        function catFilter() {
+            const selectedCategory = document.getElementById('cat-filter').value;
+
+            fetch(`/filter-by-category?category=${selectedCategory}`, {
+                method: 'GET',
+            })
+                .then(response => response.json())
+                .then(data => {
+                    updateProductList(data.products);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+
+        function handleSortChange() {
+            const sortBy = document.getElementById('sort-by').value;
+
+            fetch(`/sort?sort=${sortBy}`, {
+                method: 'GET',
+            })
+                .then(response => response.json())
+                .then(data => {
+                    updateProductList(data.products);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateProductList(products) {
+            const productsContainer = document.getElementById('products-container');
+            productsContainer.innerHTML = '';
+
+            if (products.length === 0) {
+                productsContainer.innerHTML = '<p>No products found.</p>';
+                return;
+            }
+
+            products.forEach(product => {
+                const productHTML = `
+                    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                        <div class="product-cart-wrap mb-30">
+                            <div class="product-img-action-wrap">
+                                <div class="product-img product-img-zoom">
+                                    <a href="/productdetails?id=${product._id}">
+                                        <img class="default-img" src="/uploads/re-image/${product.productImage[0]}" alt="${product.productName}">
+                                    </a>
+                                </div>
+                                <div class="product-action-1">
+                                    <a aria-label="Add To Cart" class="action-btn hover-up" href="/add-to-cart?id=${product._id}"><i class="fi-rs-shopping-bag-add"></i></a>
+                                </div>
+                            </div>
+                            <div class="product-content-wrap">
+                                <h6>${product.productName}</h6>
+                                <h5>₹${product.salePrice.toLocaleString()}</h5>
+                                ${product.quantity > 0
+                        ? `<span class="text-success">${product.quantity} stocks left</span>`
+                        : `<span class="text-danger">Out of Stock</span>`
+                    }
+                                <p>Rating: ${product.rating !== undefined ? product.rating : 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                productsContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+        }
+
+
+    </script>
+
+
+    <%- include('../partials/user/footer') %>
