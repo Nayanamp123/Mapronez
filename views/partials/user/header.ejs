@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Mobile King - eCommerce</title>
+    <title>Mapronez </title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" type="image/x-icon" href="evara-frontend/assets/imgs/theme/favicon.svg">
     <link rel="stylesheet" href="evara-frontend/assets/css/main.css">
@@ -12,7 +12,9 @@
             display: flex;
             justify-content: center;
         }
-
+        .header-info ul li a{
+            color: black;
+        }
         .header-nav {
             display: flex;
             justify-content: center;
@@ -66,6 +68,7 @@
         .dropdown:hover .dropdown-content {
             display: block;
         }
+        
 
         .dropdown-content a {
             display: block;
@@ -255,7 +258,7 @@
                             <ul>
                                 <% if (locals.user) { %>
                                     <li class="dropdown">
-                                        <a href="/userprofile" aria-haspopup="true" aria-expanded="false" style="color: #f1f1f1;">
+                                        <a href="/userprofile" aria-haspopup="true" aria-expanded="false" >
                                             <%= locals.user.username %> <i class="fi-rs-user"></i>
                                         </a>
                                         <div class="dropdown-content">

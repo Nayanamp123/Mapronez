@@ -41,7 +41,7 @@
                         <%if(message.length>0){%>
                             <span class="text-danger"><%=message%></span>
                         <%}%>
-                        <form method="POST" action="/admin/editproduct?id/<%=product._id%>" enctype="multipart/form-data"
+                        <form method="POST" action="/admin/editproduct/<%=product._id%>" enctype="multipart/form-data"
                             onsubmit="validateForm()">
                             <div class="mb-4">
                                 <label for="product_name" class="form-label">Product Name</label>
@@ -139,7 +139,7 @@
                                                     <input type="hidden" value="<%=product.productImage[i]%>"
                                                         id="imageDatas">
                                                     <img class="rounded" style="width: 50px; height: 60px;"
-                                                        src="/uploads/re-image/<%=product.productImage[i]%>" alt="">
+                                                        src="/uploads/images/<%=product.productImage[i]%>" alt="">
                                                     <i onclick="deleteSingleImage('<%=product.productImage[i]%>', '<%=product._id%>')"
                                                         style="position: absolute; margin-left: .5rem; cursor: pointer;"
                                                         class="fa-thin fa-x">&times;</i>

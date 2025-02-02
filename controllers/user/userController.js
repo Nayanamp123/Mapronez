@@ -1,5 +1,5 @@
 const User = require("../../models/userSchema");
-const Category = require('../../models/categorySchema')
+const Category = require('../../models/categorySchema');
 const Product = require('../../models/productSchema');
 const Banner = require('../../models/bannerSchema');
 // const Wallet = require('../../models/walletSchema');

@@ -86,15 +86,15 @@ const getAllProducts = async (req,res) => {
         
         const productData = await Product.find({
              $or:[
-                {productName:{$regex:".*"+search+".*",$options:"i"}},
-                {brand:{$regex:".*"+search+".*",$options:"i"}}
-             ]
+                {productName:{$regex:new RegExp(".*"+search+".*","i")}},
+                {brand:{$regex:new RegExp(".*"+search+".*","i")}},
+             ],
         }).limit(limit*1).skip((page-1)*limit).populate('category').exec();
         const count = await Product.find({
             $or:[
-                {productName:{$regex:".*"+search+".*",$options:"i"}},
-                {brand:{$regex:".*"+search+".*",$options:"i"}}
-            ]
+                {productName:{$regex:new RegExp(".*"+search+".*","i")}},
+                {brand:{$regex:new RegExp(".*"+search+".*","i")}},
+            ],
         }).countDocuments();
 
         const category = await Category.find({isListed:true});
@@ -105,8 +105,8 @@ const getAllProducts = async (req,res) => {
                 data:productData,
                 currentPage:page,
                 totalPages:Math.ceil(count/limit),
-                // cat:category,
-                // brand:brand
+                cat:category,
+                brand:brand
             });
         }else{
             res.render("")
@@ -214,21 +214,6 @@ const editProduct = async (req, res) => {
             });
         }
 
-        // Check for existing product name (excluding current product)
-        const existingProduct = await Product.findOne({
-            productName: data.productName,
-            _id: { $ne: id }
-        });
-
-        if (existingProduct) {
-            return res.status(400).render('edit-product', {
-                message: "Product with this name already exists. Please try with another name",
-                product: await Product.findOne({_id: id}),
-                cat: await Category.find({}),
-                brand: await Brand.find({})
-            });
-        }
-
         const category = await Category.findOne({ name: data.category });
         if (!category) {
             return res.status(400).render('edit-product', {
@@ -242,8 +227,18 @@ const editProduct = async (req, res) => {
         const images = [];
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
+                // Save images in the same format as addProducts
                 const resizedImagePath = path.join("public", "uploads", "images", file.filename);
-                await sharp(file.path).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
+                
+                // Resize the image and save
+                await sharp(file.path)
+                    .resize({ width: 440, height: 440 })
+                    .toFile(resizedImagePath);
+                
+                // Delete the original uploaded file
+                fs.unlinkSync(file.path);
+                
+                // Store just the filename, same as in addProducts
                 images.push(file.filename);
             }
         }
@@ -267,7 +262,7 @@ const editProduct = async (req, res) => {
         res.redirect('/admin/products');
 
     } catch (error) {
-        console.error(error);
+        console.error("Error editing product:", error);
         res.redirect('/admin/pageerror');
     }
 };

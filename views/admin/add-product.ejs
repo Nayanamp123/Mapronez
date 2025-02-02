@@ -247,7 +247,7 @@
 
                     await croppedCanvas.toBlob(blob => {
                         let input = document.getElementById('input' + index);
-                        let imgFile = new File([blob], fileName, blob)
+                        let imgFile = new File([blob],fileName, blob)
                         const fileList = new DataTransfer();
                         fileList.items.add(imgFile);
                         input.files = fileList.files;
