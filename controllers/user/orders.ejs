@@ -1,0 +1,342 @@
+<%- include('../partials/user/header') %>
+<style>
+    .btn-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    border-radius: 0.2rem;
+}
+</style>
+    <!-- Include SweetAlert library (CDN) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <main class="main">
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="/" rel="nofollow">Home</a>
+                    <span></span> Shop
+                    <span></span> Your Orders
+                </div>
+            </div>
+        </div>
+
+        <section class="pt-150 pb-150">
+            <div class="container">
+                <div class="row">
+                    <aside class="col-md-3">
+                        <div class="sidebar">
+                            <h4>Account Settings</h4><br>
+                            <ul class="list-unstyled">
+                                <li><a href="/profile">Profile</a></li>
+                                <li><a href="/orders">Orders</a></li>
+                                <li><a href="/wishlist">Wishlist</a></li>
+                                <li><a href="/address">Address</a></li>
+                                <li><a href="/wallet">Wallet</a></li>
+                                <li><a href="/logout-user">Logout</a></li>
+                            </ul>
+                        </div>
+                    </aside>
+
+                    <div class="col-md-9">
+                        <h4>Your Orders</h4><br>
+                        <% if (orders && orders.length> 0) { %>
+                            <table class="table table-striped table-bordered align-middle">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>Products</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                        <th colspan="3" class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% orders.forEach(order => { %>
+                                        <tr>
+                                            <td>
+                                                <ul class="list-unstyled mb-0">
+                                                    <% order.orderedItems.forEach(item => { %>
+                                                        <li>
+                                                            <strong><%= item.product.productName %></strong>
+                                                        </li>
+                                                    <% }) %>
+                                                </ul>
+                                            </td>
+                                            <td>
+                                                <%= order.createdAt.toLocaleDateString() %>
+                                            </td>
+                                            <td>
+                                                <span class="badge 
+                                                <% if (order.status === 'Pending') { %> bg-secondary 
+                                                    <% } else if (order.status === 'Processing') { %> bg-info 
+                                                    <% } else if (order.status === 'Shipped') { %> bg-primary 
+                                                    <% } else if (order.status === 'Delivered') { %> bg-success 
+                                                    <% } else if (order.status === 'Cancelled') { %> bg-danger 
+                                                    <% } else if (order.status === 'Return Request') { %> bg-warning 
+                                                    <% } else if (order.status === 'Returned') { %> bg-dark 
+                                                    <% } %>">
+                                                    <%= order.status %>
+                                                </span>
+                                            </td>
+                                            <td>₹<%= order.finalAmount.toLocaleString() %></td>
+                                            <td class="text-center">
+                                                <a href="/order-details?id=<%= order._id %>" class="btn btn-xs btn-success">
+                                                    <i class="material-icons">visibility</i> View Details
+                                                </a>
+                                            </td>
+                                            <% if (order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== 'Return Request' && order.status !== 'Returned') { %>
+                                                <td class="text-center">
+                                                    <button class="btn btn-xs btn-danger" onclick="confirmCancelOrder('<%= order._id %>')">
+                                                        <i class="material-icons">cancel</i> Cancel Order
+                                                    </button>
+                                                </td>
+                                            <% } %>
+                                            <% if (order.paymentStatus === 'Pending' && order.paymentMethod === 'Online') { %>
+                                                <td class="text-center">
+                                                    <button id="continuePaymentButton" class="btn btn-xs btn-primary" 
+                                                        onclick="retryPayment('<%= order._id %>')">
+                                                        <i class="material-icons">payment</i> Continue Payment
+                                                    </button>
+                                                </td>
+                                            <% } %>
+                                            <% if (order.status && order.status.toLowerCase()==="delivered" ) { %>
+                                                <td class="text-center">
+                                                    <button class="btn btn-xs btn-primary"
+                                                    onclick="confirmReturn('<%= order._id %>')">Return</button>
+                                                </td>
+                                            <% } %>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>                            
+                            
+                            <div class="pagination-area mt-15 mb-50 container">
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination justify-content-start">
+                                        <!-- Previous Button -->
+                                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                                            <a class="page-link d-flex justify-content-center align-items-center"
+                                                href="<%= currentPage === 1 ? '#' : `?page=${currentPage - 1}` %>"
+                                                <%=currentPage===1 ? 'aria-disabled="true"' : '' %>>
+                                                <span class="material-icons">chevron_left</span>
+                                            </a>
+                                        </li>
+
+                                        <!-- Page Numbers -->
+                                        <% let startPage=Math.max(1, currentPage - 2); let endPage=Math.min(totalPages,
+                                            startPage + 4); if (endPage - startPage < 4) { startPage=Math.max(1, endPage
+                                            - 4); } if (startPage> 1) { %>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=1">1</a>
+                                            </li>
+                                            <% if (startPage> 2) { %>
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">...</span>
+                                                </li>
+                                                <% } %>
+                                                    <% } %>
+
+                                                        <% for(let i=startPage; i <=endPage; i++) { %>
+                                                            <li
+                                                                class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                                <a class="page-link" href="?page=<%= i %>">
+                                                                    <%= i %>
+                                                                </a>
+                                                            </li>
+                                                            <% } %>
+
+                                                                <% if (endPage < totalPages) { %>
+                                                                    <% if (endPage < totalPages - 1) { %>
+                                                                        <li class="page-item disabled">
+                                                                            <span class="page-link">...</span>
+                                                                        </li>
+                                                                        <% } %>
+                                                                            <li class="page-item">
+                                                                                <a class="page-link"
+                                                                                    href="?page=<%= totalPages %>">
+                                                                                    <%= totalPages %>
+                                                                                </a>
+                                                                            </li>
+                                                                            <% } %>
+
+                                                                                <!-- Next Button -->
+                                                                                <li
+                                                                                    class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                                                                    <a class="page-link d-flex justify-content-center align-items-center"
+                                                                                        href="<%= currentPage === totalPages ? '#' : `?page=${currentPage + 1}` %>"
+                                                                                        <%=currentPage===totalPages
+                                                                                        ? 'aria-disabled="true"' : ''
+                                                                                        %>>
+                                                                                        <span
+                                                                                            class="material-icons">chevron_right</span>
+                                                                                    </a>
+                                                                                </li>
+                                    </ul>
+                                </nav>
+                            </div><br>
+                            <% } else { %>
+                                <p>You have no orders yet.</p>
+                                <% } %>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <%- include('../partials/user/footer') %>
+
+        <script>
+            function confirmCancelOrder(orderId) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, cancel it!',
+                    input: 'text',
+                    inputPlaceholder: 'Enter reason for cancellation',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'You need to provide a reason for cancellation!'
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const reason = result.value;
+                        window.location.href = `/cancel-order?id=${orderId}&reason=${encodeURIComponent(reason)}`;
+                    }
+                });
+            }
+        </script>
+
+        <script>
+        async function confirmReturn(orderId) {
+          try {
+            const result = await Swal.fire({
+              title: "Return Order?",
+              icon: "warning",
+              text: "Reason for Returning Product",
+              html: `<textarea id="returnReason" class="swal2-textarea" placeholder="Enter your reason here"></textarea>`,
+              showCancelButton: true,
+              confirmButtonText: 'Submit',
+              cancelButtonText: 'Cancel',
+              preConfirm: () => {
+                const reason = document.getElementById('returnReason').value.trim();
+                if (!reason) {
+                  Swal.showValidationMessage('Reason cannot be empty');
+                }
+                return reason;
+              }
+            });
+
+            if (result.isConfirmed) {
+              const reason = result.value;
+
+              const response = await fetch('/return-request', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json', 
+                },
+                body: JSON.stringify({ 
+                  orderId: orderId,
+                  reason: reason,
+                }),
+              });
+
+              const responseData = await response.json();
+              if (response.ok) {
+                Swal.fire('Success!', responseData.message, 'success');
+              } else {
+                Swal.fire('Error!', responseData.message, 'error');
+              }
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
+          }
+        }
+        </script>
+
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script>
+            async function retryPayment(orderId) {
+                try {
+                    const response = await fetch('/retry-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderId })
+                    });
+
+                    const data = await response.json();
+                    if (!data.success) {
+                        throw new Error(data.message || 'Failed to initialize retry payment');
+                    }
+
+                    const options = {
+                        key: data.razorpayKey,
+                        amount: data.amount,
+                        currency: data.currency,
+                        order_id: data.razorpayOrderId,
+                        handler: async function (response) {
+                            try {
+                                const verifyResponse = await fetch('/verify-payment', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        orderId: orderId,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_signature: response.razorpay_signature
+                                    })
+                                });
+
+                                const verifyData = await verifyResponse.json();
+                                if (!verifyData.success) throw new Error(verifyData.message || 'Payment verification failed');
+
+                                const finalOrderResponse = await fetch('/place-order', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        orderId: orderId,
+                                        paymentSuccess: true,
+                                        paymentDetails: {
+                                            razorpay_payment_id: response.razorpay_payment_id,
+                                            razorpay_order_id: response.razorpay_order_id,
+                                            razorpay_signature: response.razorpay_signature
+                                        }
+                                    })
+                                });
+
+                                const finalOrderData = await finalOrderResponse.json();
+                                if (!finalOrderData.success) throw new Error(finalOrderData.message || 'Failed to finalize order');
+
+                                window.location.href = `/order-confirmation?id=${orderId}`;
+                            } catch (error) {
+                                Swal.fire({ title: 'Order Error', text: error.message || 'Failed to complete order', icon: 'error' });
+                            }
+                        },
+                        modal: {
+                            ondismiss: function () {
+                                Swal.fire({
+                                    title: 'Payment Cancelled',
+                                    text: 'Your payment was cancelled. You can retry payment from the order details page.',
+                                    icon: 'info'
+                                });
+                            }
+                        }
+                    };
+
+                    const razorpay = new Razorpay(options);
+                    razorpay.open();
+                } catch (error) {
+                    Swal.fire({ title: 'Payment Error', text: error.message || 'Failed to retry payment', icon: 'error' });
+                }
+            }
+
+        </script>

@@ -86,7 +86,7 @@ router.use(session({
     saveUninitialized: false,
     cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
-
+// Home page
 router.get('/page-not-found', userController.pageNotFound)
 router.get('/', userController.loadHomepage)
 router.get('/sort', userController.sortProducts);
@@ -134,7 +134,7 @@ router.post('/add-to-cart', cartController.addToCart);
 router.post('/remove-cart-item', cartController.removeCartItem);
 router.post('/update-cart-quantity', cartController.updateCart);
 
-// router.get('/checkout', productController.getCheckout);
+router.get('/checkout', productController.getCheckout);
 // router.post('/place-order', productController.placeOrder);
 // router.post('/place-order-initial',productController.placeOrderInitial);
 // router.post('/retry-payment',paymentController.retryPayment);

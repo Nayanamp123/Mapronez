@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Decorative outer frame -->
+  <path d="M30 100 A70 70 0 1 1 170 100 A70 70 0 1 1 30 100" 
+        fill="none" stroke="#e291bc" stroke-width="1"/>
+  
+  <!-- Inner decorative circle -->
+  <circle cx="100" cy="100" r="60" fill="none" stroke="#4CAF50" stroke-width="1"/>
+  
+  <!-- Stylized M -->
+  <path d="M60 70 L60 130 L80 100 L100 130 L100 70" 
+        fill="none" stroke="#4CAF50" stroke-width="6" 
+        stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Stylized P -->
+  <path d="M100 70 L100 130 M100 70 Q130 70 130 85 Q130 100 100 100" 
+        fill="none" stroke="#e291bc" stroke-width="6" 
+        stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Decorative flourishes -->
+  <path d="M40 40 Q100 20 160 40" stroke="#4CAF50" stroke-width="1" fill="none"/>
+  <path d="M40 160 Q100 180 160 160" stroke="#e291bc" stroke-width="1" fill="none"/>
+  
+  <!-- Small decorative elements -->
+  <circle cx="100" cy="30" r="3" fill="#e291bc"/>
+  <circle cx="100" cy="170" r="3" fill="#4CAF50"/>
+</svg>

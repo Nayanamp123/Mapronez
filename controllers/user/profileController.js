@@ -134,7 +134,7 @@ const resendOtp = async (req, res) => {
     }
 }
 
-const resetPassword = async (req, res) => {
+const  resetPassword = async (req, res) => {
     try {
 
         const { newPass1, newPass2 } = req.body;
@@ -160,6 +160,7 @@ const getUserProfile = async (req, res) => {
         }
 
         const userData = await User.findById(user);
+        const  addressData = await Address.findOne
 
         res.render('profile', { user: userData});
 

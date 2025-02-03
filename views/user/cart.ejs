@@ -1,0 +1,279 @@
+<%- include('../partials/user/header') %>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-quantity {
+            padding: 0 8px;
+            font-size: 16px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        .quantity-display {
+            font-weight: bold;
+        }
+
+        .empty-cart-container {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-cart-icon {
+            font-size: 80px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .empty-cart-text {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .empty-cart-subtext {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .shopping-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 25px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .shopping-btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .shopping-btn i {
+            margin-right: 8px;
+        }
+    </style>
+
+    <main class="main">
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="index.html" rel="nofollow">Home</a>
+                    <span></span> Shop
+                    <span></span> Your Cart
+                </div>
+            </div>
+        </div>
+        <section class="mt-50 mb-50">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+
+                            <%if(cart && cart.items.length>0){%>
+                                <table class="table shopping-summery text-center clean">
+                                    <thead>
+                                        <tr class="main-heading">
+                                            <th scope="col">Image</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Price</th>
+                                            <th scope="col">Quantity</th>
+                                            <th scope="col">Subtotal</th>
+                                            <th scope="col">Remove</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <%for(let i=0;i<cart.items.length;i++){%>
+                                            <tr>
+                                                <td class="image product-thumbnail"><img
+                                                        src="/uploads/re-image/<%= cart.items[i].productId.productImage[0] %>"
+                                                        alt="<%=cart.items[i].productId.productName%>"></td>
+                                                <td class="product-des product-name">
+                                                    <h5 class="product-name"><a href="/">
+                                                            <%=cart.items[i].productId.productName%>
+                                                        </a></h5>
+                                                </td>
+                                                <td class="price" data-title="Price"><span>₹ <%=
+                                                            cart.items[i].price.toLocaleString() %></span></td>
+                                                <td class="text-center" data-title="Stock">
+                                                    <%if(cart.items[i].productId.quantity > 0){%>
+                                                        <div class="quantity-control">
+                                                            <button type="button"
+                                                                onclick="updateQuantity('<%= cart.items[i].productId._id %>', -1,'<%= cart.items[i].productId.quantity %>')"
+                                                                class="btn-quantity">-</button>
+                                                            <span id="quantity-<%= cart.items[i].productId._id %>"
+                                                                class="quantity-display">
+                                                                <%= cart.items[i].quantity %>
+                                                            </span>
+                                                            <button type="button"
+                                                                onclick="updateQuantity('<%= cart.items[i].productId._id %>', 1,'<%= cart.items[i].productId.quantity %>')"
+                                                                class="btn-quantity">+</button>
+                                                        </div>
+                                                    <%}else{%>
+                                                        <span class="tex-danger">
+                                                            Out of stock
+                                                        </span>
+                                                    <%}%>
+                                                    
+                                                </td>
+                                                <td class="text-right" data-title="Cart">
+                                                    <span id="subtotal-<%= cart.items[i].productId._id %>">₹ <%=
+                                                            cart.items[i].totalPrice.toLocaleString() %></span>
+                                                </td>
+
+                                                <td class="action" data-title="Remove">
+                                                    <form id="remove-form-<%= cart.items[i].productId._id %>"
+                                                        action="/remove-cart-item" method="POST">
+                                                        <input type="hidden" name="productId"
+                                                            value="<%= cart.items[i].productId._id %>">
+                                                        <button type="button" class="btn btn-danger"
+                                                            onclick="confirmRemove('<%= cart.items[i].productId._id %>')">
+                                                            <i class="fi-rs-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            <%}%>
+                                    </tbody>
+                                </table>
+                                <%}else{%>
+                                    <div class="empty-cart-container">
+                                        <div class="empty-cart-icon">
+                                            <i class="fi-rs-shopping-cart"></i>
+                                        </div>
+                                        <h2 class="empty-cart-text">Your Cart is Empty</h2>
+                                        <p class="empty-cart-subtext">Looks like you haven't added anything to your cart
+                                            yet.
+                                        </p>
+                                        <a href="/" class="shopping-btn">
+                                            <i class="fi-rs-shopping-bag"></i>
+                                            Start Shopping
+                                        </a>
+                                    </div>
+                                    <%}%>
+
+                        </div>
+                        <div class="cart-action text-end">
+                            <a class="btn btn-success" href="/"><i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping</a>
+                        </div>
+                        <br>
+                        <hr><br>
+                        <div class="row mb-50">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="border p-md-4 p-30 border-radius cart-totals">
+                                    <div class="heading_s1 mb-3">
+                                        <h4>Cart Totals</h4>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                    <td class="cart_total_label">Cart Subtotal</td>
+                                                    <td class="cart_total_amount"><span
+                                                            class="font-lg fw-900 text-brand" id="total-price">₹ <%=
+                                                                totalAmount.toLocaleString() %></span></td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+                                    <%if(cart){%>
+                                        <a href="/checkout" class="btn btn-success"> <i class="fi-rs-box-alt mr-10"></i> Proceed To
+                                            CheckOut</a>
+                                        <%}else{%>
+                                            <a href="#" class="btn btn-success"> <i class="fi-rs-box-alt mr-10"></i> Proceed To
+                                                CheckOut</a>
+                                            <%}%>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+
+    <script>
+        function confirmRemove(productId) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Do you want to remove this item from the cart?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, remove it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`remove-form-${productId}`).submit();
+                }
+            });
+        }
+
+
+        function updateQuantity(productId, change, availableQuantity) {
+            const quantityElement = document.getElementById(`quantity-${productId}`);
+            const currentQuantity = parseInt(quantityElement.textContent);
+
+            const maxQuantity = Math.min(availableQuantity, 5);
+
+            if (currentQuantity + change < 1) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Minimum Quantity Reached",
+                    text: "The minimum quantity is 1.",
+                });
+                return;
+            }else if(currentQuantity + change > maxQuantity){
+                Swal.fire({
+                    icon: "warning",
+                    title: "Maximum Quantity Reached"
+                });
+                return;
+            }
+
+            fetch(`/update-cart-quantity`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ productId, change }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        quantityElement.textContent = data.newQuantity;
+                        document.getElementById(`subtotal-${productId}`).textContent = `₹ ${data.newSubtotal.toLocaleString()}`;
+                        document.getElementById("total-price").textContent = `₹ ${data.totalPrice.toLocaleString()}`;
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: data.message,
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+        }
+
+
+    </script>
+
+    <%- include('../partials/user/footer') %>
