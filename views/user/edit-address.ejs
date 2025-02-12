@@ -130,7 +130,7 @@
         let isValid = true;
 
         const name = document.getElementById('name').value;
-        if (name.trim() === '') {
+        if (name.trim() === ' '||name.length === 0) {
             document.getElementById('nameErr').innerText = 'Name is required.';
             isValid = false;
         }
@@ -160,7 +160,7 @@
         }
 
         const phone = document.getElementById('phone').value;
-        if (phone.trim() === '' || phone.length < 10) {
+        if (phone.trim() === '' || phone.length < 10 || phone.length === 0) {
             document.getElementById('phoneErr').innerText = 'Phone number must be at least 10 digits.';
             isValid = false;
         }

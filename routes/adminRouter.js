@@ -6,10 +6,10 @@ const categoryController = require('../controllers/admin/categoryController')
 const brandController = require('../controllers/admin/brandController')
 const productController = require('../controllers/admin/productController')
 const orderController = require('../controllers/admin/orderController');
-// const stockController = require('../controllers/admin/stockController');
-// const couponController = require('../controllers/admin/couponController');
-// const saleReportController = require('../controllers/admin/salesReportController');
-// const returnController = require('../controllers/admin/returnController');
+const stockController = require('../controllers/admin/stockController');
+const couponController = require('../controllers/admin/couponController');
+const saleReportController = require('../controllers/admin/salesReportController');
+const returnController = require('../controllers/admin/returnController');
 const {userAuth,adminAuth} = require('../middlewares/auth')
 const multer = require('multer');
 const storage = require('../helpers/multer')
@@ -57,6 +57,32 @@ router.get('/unblockproduct',adminAuth,productController.unBlockProduct);
 router.get('/editproduct',adminAuth,productController.getEditProduct);
 router.post('/editproduct/:id',adminAuth,upload.array('images',4),productController.editProduct);
 router.post('/deleteimage',adminAuth,productController.deleteSingleImage);
+
+//order controller
+router.get('/orders',adminAuth,orderController.getOrderPage);
+router.post('/update-order-status',orderController.updateOrderStatus)
+router.get('/return-approvals',adminAuth,returnController.getReturnApprovals)
+router.post('/returnDataUpdate',adminAuth,returnController.returnUpdate);
+
+
+
+//stock management
+router.get('/stocks',adminAuth,stockController.getStocks);
+router.post('/update-stock',adminAuth,stockController.updateStock);
+
+
+
+//coupon management
+router.get('/coupons',adminAuth,couponController.getCouponPage)
+router.post('/save-coupon',adminAuth,couponController.addCoupon)
+router.get('/delete-coupon',adminAuth,couponController.deleteCoupon)
+
+
+
+//sales report
+router.get('/sales-report', adminAuth, saleReportController.getSalesReport);
+router.get('/export-sales-data', adminAuth, saleReportController.getExportData);
+
 
 
 module.exports = router

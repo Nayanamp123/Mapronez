@@ -27,20 +27,26 @@ const getBrandPage = async (req,res) => {
 
 const addBrand = async (req,res) => {
     try {
-        
         const brand = req.body.name;
-        const findBrand = await Brand.findOne({brand});
-        if(!findBrand){
-            const image = req.file.filename;
-            const newBrand = new Brand({
-                brandName:brand,
-                brandImage:image,
-            })
-
-            await newBrand.save();
-            res.redirect('/admin/brands');
+        
+        // Case-insensitive check for existing brand
+        const existingBrand = await Brand.findOne({
+            brandName: { $regex: `^${brand}$`, $options: 'i' }
+        });
+    
+        if (existingBrand) {
+            return res.status(400).json({ error: "Brand already exists" });
         }
-
+    
+        const image = req.file.filename;
+        const newBrand = new Brand({
+            brandName: brand,
+            brandImage: image,
+        });
+    
+        await newBrand.save();
+        res.redirect('/admin/brands');
+    
     } catch (error) {
         res.redirect('/pageerror')
         console.log(error)

@@ -63,7 +63,7 @@ const loadDashboard = async (req, res) => {
 
             const count = await Order.countDocuments();
 
-            // const {totalSalesAmount,monthly,yearly} = salesData;
+            const {totalSalesAmount,monthly,yearly} = salesData;
 
             res.render('dashboard', { salesData, products, categories, brands,count });
         }

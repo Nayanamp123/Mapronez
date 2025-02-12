@@ -13,8 +13,18 @@ passport.use(new GoogleStrategy({
 async (accessToken,refreshToken,profile,done)=>{
     try {
         
-        let user = await User.findOne({googleId:profile.id});
+        let user = await User.findOne({$or: [
+            { googleId: profile.id },
+            { email: profile.emails[0].value }
+          ]});
+        console.log(user);
+        
         if(user){
+            if (!user.googleId) {
+                user.googleId = profile.id;
+                await user.save();
+              }
+              
             return done(null,user);
         }else{
             user = new User({
@@ -27,6 +37,7 @@ async (accessToken,refreshToken,profile,done)=>{
         }
 
     } catch (error) {
+        
         return done(error,null)
     }
 }

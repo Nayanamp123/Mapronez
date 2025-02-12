@@ -1,362 +1,415 @@
 <%- include('../partials/user/header') %>
-    <style>
-        header {
-            position: relative;
-            z-index: 1000;
-        }
 
-        .detail-gallery .product-image-slider {
-            position: relative;
-            z-index: 10;
-            overflow: hidden;
-        }
+<style>
+    header {
+        position: relative;
+        z-index: 1000;
+    }
 
-        .modal-body {
-            padding-top: 100px;
-        }
+    .detail-gallery .product-image-slider {
+        position: relative;
+        z-index: 10;
+        overflow: hidden;
+    }
 
-        .detail-extralink {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
+    .modal-body {
+        padding-top: 100px;
+    }
 
-        .detail-qty {
-            display: flex;
-            align-items: center;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 5px;
-            height: 40px;
-            width: 100px;
-            /* Ensure consistency in width */
-        }
+    .detail-extralink {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
 
-        .qty-val {
-            flex: 1;
-            text-align: center;
-            font-size: 16px;
-            background-color: #fff;
-            color: #333;
-            border: none;
-            margin: 0;
-        }
+    .detail-qty {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 5px;
+        height: 40px;
+        width: 100px;
+    }
 
-        .qty-controls {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+    .qty-val {
+        flex: 1;
+        text-align: center;
+        font-size: 16px;
+        background-color: #fff;
+        color: #333;
+        border: none;
+        margin: 0;
+    }
 
-        .qty-down,
-        .qty-up {
-            background-color: #f8f9fa;
-            border: none;
-            color: #333;
-            font-size: 12px;
-            width: 30px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
+    .qty-controls {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
 
-        .qty-down:hover,
-        .qty-up:hover {
-            background-color: #e9ecef;
-        }
+    .qty-down,
+    .qty-up {
+        background-color: #f8f9fa;
+        border: none;
+        color: #333;
+        font-size: 12px;
+        width: 30px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
 
-        .qty-down {
-            border-radius: 0 0 8px 0;
-        }
+    .qty-down:hover,
+    .qty-up:hover {
+        background-color: #e9ecef;
+    }
 
-        .qty-up {
-            border-radius: 8px 0 0 0;
-        }
+    .qty-down {
+        border-radius: 0 0 8px 0;
+    }
 
-        .product-extra-link2 {
-            display: inline-block;
-        }
+    .qty-up {
+        border-radius: 8px 0 0 0;
+    }
 
-        .btn-success {
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: bold;
-        }
+    .product-extra-link2 {
+        display: inline-block;
+    }
 
-        .action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #555;
-            font-size: 20px;
-            transition: color 0.2s ease;
-        }
+    .btn-success {
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+    }
 
-        .action-btn:hover {
-            color: #e74c3c;
-        }
+    .action-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #555;
+        font-size: 20px;
+        transition: color 0.2s ease;
+    }
 
-        .product-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
-            margin-top: 20px;
-        }
+    .action-btn:hover {
+        color: #e74c3c;
+    }
 
-        .cart-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-            justify-content: center;
-        }
+    .product-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+        margin-top: 20px;
+    }
 
-        .btn-buy-now {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            border-radius: 4px;
-            width: 100%;
-            max-width: 300px;
-            transition: background-color 0.2s ease;
-        }
+    .cart-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        width: 100%;
+        justify-content: center;
+    }
 
-        .btn-buy-now:hover {
-            background-color: #218838;
-            color: white;
-            text-decoration: none;
-        }
-    </style>
+    .btn-buy-now {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 4px;
+        width: 100%;
+        max-width: 300px;
+        transition: background-color 0.2s ease;
+    }
 
+    .btn-buy-now:hover {
+        background-color: #218838;
+        color: white;
+        text-decoration: none;
+    }
 
-    <div class="container">
-        <nav aria-label="breadcrumb" class="mt-3">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/category/<%= product.category %>">
-                        <%= cat.name %>
-                    </a></li>
-                <li class="breadcrumb-item active" aria-current="page">
-                    <%= product.productName %>
-                </li>
-            </ol>
-        </nav>
-    </div>
+    .product-image-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+    }
 
+    .product-image {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
 
-    <div class="container">
-        <div class="modal-body">
-            <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
-                <div class="col-md-6 col-sm-12 col-xs-12">
-                    <div class="detail-gallery">
-                        <span class="zoom-icon"><i class="fi-rs-search"></i></span>
-                        <!-- MAIN SLIDES -->
-                        <div class="product-image-slider">
+    .zoom-lens {
+        position: absolute;
+        border: 1px solid #d4d4d4;
+        width: 300px;
+        height: 300px;
+        cursor: crosshair;
+        display: none;
+    }
 
-                            <%for(let i=0;i<product.productImage.length;i++){%>
-                                <figure class="border-radius-10">
-                                    <img src="/uploads/re-image/<%= product.productImage[i] %>"
-                                        alt="<%=product.productName%>">
-                                </figure>
-                                <%}%>
-                        </div>
-                        <!-- THUMBNAILS -->
-                        <div class="slider-nav-thumbnails pl-15 pr-15">
-                            <%for(let i=0;i<product.productImage.length;i++){%>
-                                <div><img src="/uploads/re-image/<%= product.productImage[i] %>" alt="product image">
-                                </div>
-                                <%}%>
-                        </div>
+    .zoom-result {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 1px solid #d4d4d4;
+        width: 500px;
+        height: 500px;
+        pointer-events: none;
+        display: none;
+        z-index: 1000;
+    }
+</style>
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="mt-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/category/<%= product.category %>"><%= cat.name %></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><%= product.productName %></li>
+        </ol>
+    </nav>
+</div>
+
+<div class="container">
+    <div class="modal-body">
+        <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
+            <div class="col-md-6 col-sm-12 col-xs-12">
+                <div class="detail-gallery">
+                    <span class="zoom-icon"><i class="fi-rs-search"></i></span>
+                    <!-- MAIN SLIDES -->
+                    <div class="product-image-container">
+                        <img id="productImage" src="/uploads/images/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="product-image">
+                        <div class="zoom-lens"></div>
                     </div>
-                    <!-- End Gallery -->
-                    <div class="social-icons single-share">
-                        <ul class="text-grey-5 d-inline-block">
-                            <li><strong class="mr-10">Share this:</strong></li>
-                            <li class="social-facebook"><a href="#"><img
-                                        src="evara-frontend/assets/imgs/theme/icons/icon-facebook.svg" alt=""></a></li>
-                            <li class="social-twitter"> <a href="#"><img
-                                        src="evara-frontend/assets/imgs/theme/icons/icon-twitter.svg" alt=""></a></li>
-                            <li class="social-instagram"><a href="#"><img
-                                        src="evara-frontend/assets/imgs/theme/icons/icon-instagram.svg" alt=""></a></li>
-                            <li class="social-linkedin"><a href="#"><img
-                                        src="evara-frontend/assets/imgs/theme/icons/icon-pinterest.svg" alt=""></a></li>
-                        </ul>
+                    <!-- THUMBNAILS -->
+                    <div class="slider-nav-thumbnails pl-15 pr-15">
+                        <% product.productImage.forEach((image, index) => { %>
+                            <div>
+                                <img src="/uploads/images/<%= image %>" alt="product image" onclick="changeImage(image,index)">
+                            </div>
+                        <% }) %>
                     </div>
                 </div>
+                <!-- End Gallery -->
+                <div class="social-icons single-share">
+                    <ul class="text-grey-5 d-inline-block">
+                        <li><strong class="mr-10">Share this:</strong></li>
+                        <li class="social-facebook"><a href="#"><img src="evara-frontend/assets/imgs/theme/icons/icon-facebook.svg" alt=""></a></li>
+                        <li class="social-twitter"> <a href="#"><img src="evara-frontend/assets/imgs/theme/icons/icon-twitter.svg" alt=""></a></li>
+                        <li class="social-instagram"><a href="#"><img src="evara-frontend/assets/imgs/theme/icons/icon-instagram.svg" alt=""></a></li>
+                        <li class="social-linkedin"><a href="#"><img src="evara-frontend/assets/imgs/theme/icons/icon-pinterest.svg" alt=""></a></li>
+                    </ul>
+                </div>
+            </div>
 
-                <div class="col-md-6 col-sm-12 col-xs-12">
-                    <div class="detail-info">
-                        <h3 class="title-detail mt-30 text-center">
-                            <%=product.productName%>
-                        </h3>
-                        <div class="product-detail-rating text-center">
-                            <div class="pro-details-brand">
-                                <span> Brand: <a href="shop-grid-right.html">
-                                        <%=product.brand%>
-                                    </a></span>
-                            </div>
-                            <div class="product-rate-cover text-end">
-                                <div class="product-rate d-inline-block">
-                                    <div class="product-rating" style="width:90%"></div>
-                                </div>
-                                <span class="font-small ml-5 text-muted"> (25 reviews)</span>
-                            </div>
+            <div class="col-md-6 col-sm-12 col-xs-12">
+                <div class="detail-info">
+                    <h3 class="title-detail mt-30 text-center"><%=product.productName%></h3>
+                    <div class="product-detail-rating text-center">
+                        <div class="pro-details-brand">
+                            <span> Brand: <a href="shop-grid-right.html"><%=product.brand%></a></span>
                         </div>
-                        <div class="clearfix product-price-cover text-center">
-                            <div class="product-price primary-color">
-                              <ins><span class="text-brand">
-                                ₹ <%=finalSalePrice.toLocaleString() || product.salePrice.toLocaleString()%>
-                              </span></ins>
-                              <ins><span class="old-price font-md ml-15">
-                                ₹ <%=product.regularPrice.toLocaleString()%>
-                              </span></ins>
-                                <span class="save-price font-md color3 ml-15">
-                                  <%=highestOffer%>%
-                                </span>
+                        <div class="product-rate-cover text-end">
+                            <div class="product-rate d-inline-block">
+                                <div class="product-rating" style="width:90%"></div>
                             </div>
-                          </div>
-                          
-                        <div class="bt-1 border-color-1 mt-15 mb-15"></div>
-                        <div class="short-desc mb-30 text-center">
-                            <p class="font-sm">
-                                <%=product.description%>
-                            </p>
+                            <span class="font-small ml-5 text-muted"> (25 reviews)</span>
                         </div>
-
-                        <div class="attr-detail attr-color mb-15 text-center">
-                            <strong class="mr-10">Color: <%=product.color%></strong>
-                        </div>
-                        <% if(product.quantity> 0) { %>
-                            <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                            <div class="product-actions">
-                                <div class="cart-actions">
-                                    <div class="detail-qty">
-                                        <input type="text" name="quantity" value="1" class="qty-val" id="qty-val"
-                                            readonly>
-                                        <div class="qty-controls">
-                                            <button type="button" class="qty-up" onclick="updateQuantity(1)">
-                                                <i class="fi-rs-angle-small-up"></i>
-                                            </button>
-                                            <button type="button" class="qty-down" onclick="updateQuantity(-1)">
-                                                <i class="fi-rs-angle-small-down"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <form action="/add-to-cart?id=<%= product._id %>" method="POST"
-                                        style="display: inline; " onsubmit="syncQuantity()">
-                                        <input type="hidden" name="quantity" id="cart-quantity" value="1">
-                                        <button type="submit" class="btn btn-success">Add to cart</button>
-                                    </form>
-
-                                    <button type="button" aria-label="Add To Wishlist" class="action-btn hover-up"
-                                        onclick="addToWishlist('<%=product._id%>')">
-                                        <i class="fi-rs-heart"></i>
-                                    </button>
-                                </div>
-                                <a href="/checkout?id=<%= product._id %>" class="btn-buy-now">Buy Now</a>
-                            </div>
-                            <% } else { %>
-                                <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                                <div class="detail-extralink text-center">
-                                    <p class="text-danger font-weight-bold">Sold Out</p>
-                                    <div class="product-extra-link2 d-inline-block">
-                                        <button type="button" class="button button-add-to-cart" disabled
-                                            style="background-color: #d3d3d3; cursor: not-allowed;">Sold Out</button>
-                                        <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#"><i
-                                                class="fi-rs-heart"></i></a>
-                                    </div>
-                                </div>
-                                <% } %>
-
-                                    <%if(product.quantity> 0){%>
-                                        <ul class="product-meta font-xs color-grey mt-50 text-center"><br>
-                                            <li>Availability:<span class="in-stock text-success ml-5">
-                                                    <%=product.quantity%> Items In Stock
-                                                </span></li>
-                                        </ul>
-                                        <%}else{%>
-                                            <ul class="product-meta font-xs color-grey mt-50 text-center"><br>
-                                                <li>Availability:<span class="in-stock text-danger ml-5">Out of
-                                                        Stock</span></li>
-                                            </ul>
-                                            <%}%>
                     </div>
+                    <div class="clearfix product-price-cover text-center">
+                        <div class="product-price primary-color">
+                            <ins><span class="text-brand">₹ <%=finalSalePrice.toLocaleString() || product.salePrice.toLocaleString()%></span></ins>
+                            <ins><span class="old-price font-md ml-15">₹ <%=product.regularPrice.toLocaleString()%></span></ins>
+                            <span class="save-price font-md color3 ml-15"><%=highestOffer%>%</span>
+                        </div>
+                    </div>
+                    <div class="bt-1 border-color-1 mt-15 mb-15"></div>
+                    <div class="short-desc mb-30 text-center">
+                        <p class="font-sm"><%=product.description%></p>
+                    </div>
+                    <div class="attr-detail attr-color mb-15 text-center">
+                        <strong class="mr-10">Color: <%=product.color%></strong>
+                    </div>
+                    <% if(product.quantity > 0) { %>
+                        <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+                        <div class="product-actions">
+                            <div class="cart-actions">
+                                <div class="detail-qty">
+                                    <input type="text" name="quantity" value="1" class="qty-val" id="qty-val" readonly>
+                                    <div class="qty-controls">
+                                        <button type="button" class="qty-up" onclick="updateQuantity(1)">
+                                            <i class="fi-rs-angle-small-up"></i>
+                                        </button>
+                                        <button type="button" class="qty-down" onclick="updateQuantity(-1)">
+                                            <i class="fi-rs-angle-small-down"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <form action="/add-to-cart?id=<%= product._id %>" method="POST" style="display: inline;" onsubmit="syncQuantity()">
+                                    <input type="hidden" name="quantity" id="cart-quantity" value="1">
+                                    <button type="submit" class="btn btn-success">Add to cart</button>
+                                </form>
+                                <button type="button" aria-label="Add To Wishlist" class="action-btn hover-up" onclick="addToWishlist('<%=product._id%>')">
+                                    <i class="fi-rs-heart"href = "/add-to-wishlist"></i>
+                                </button>
+                            </div>
+                            <a href="/checkout?id=<%= product._id %>" class="btn-buy-now">Buy Now</a>
+                        </div>
+                    <% } else { %>
+                        <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+                        <div class="detail-extralink text-center">
+                            <p class="text-danger font-weight-bold">Sold Out</p>
+                            <div class="product-extra-link2 d-inline-block">
+                                <button type="button" class="button button-add-to-cart" disabled style="background-color: #d3d3d3; cursor: not-allowed;">Sold Out</button>
+                                <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#"><i class="fi-rs-heart"></i></a>
+                            </div>
+                        </div>
+                    <% } %>
+                    <%if(product.quantity > 0){%>
+                        <ul class="product-meta font-xs color-grey mt-50 text-center"><br>
+                            <li>Availability:<span class="in-stock text-success ml-5"><%=product.quantity%> Items In Stock</span></li>
+                        </ul>
+                    <%}else{%>
+                        <ul class="product-meta font-xs color-grey mt-50 text-center"><br>
+                            <li>Availability:<span class="in-stock text-danger ml-5">Out of Stock</span></li>
+                        </ul>
+                    <%}%>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="recommended-products container mt-5">
-        <h4 class="text-center mb-4">Recommended Products</h4>
-        <div class="row">
-            <% recProducts.forEach(recommended=> { %>
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <div class="card">
-                        <a href="/productdetails?id=<%= recommended._id %>">
-                            <img src="/uploads/re-image/<%= recommended.productImage[0] %>" class="card-img-top"
-                                alt="<%= recommended.productName %>">
-                        </a>
-                        <div class="card-body text-center">
-                            <h5 class="card-title">
-                                <%= recommended.productName %>
-                            </h5>
-                            <p class="card-text text-primary">₹ <%= recommended.salePrice.toLocaleString() %>
-                            </p>
-                            <a href="/productdetails?id=<%= recommended._id %>"
-                                class="btn btn-outline-success btn-success">View
-                                Details</a>
-                        </div>
+<div class="zoom-result"></div>
+
+<div class="recommended-products container mt-5">
+    <h4 class="text-center mb-4">Recommended Products</h4>
+    <div class="row">
+        <% recProducts.forEach(recommended => { %>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="card">
+                    <a href="/productdetails?id=<%= recommended._id %>">
+                        <img src="/uploads/images/<%= recommended.productImage[0] %>" class="card-img-top" alt="<%= recommended.productName %>">
+                    </a>
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><%= recommended.productName %></h5>
+                        <p class="card-text text-primary">₹ <%= recommended.salePrice.toLocaleString() %></p>
+                        <a href="/productdetails?id=<%= recommended._id %>" class="btn btn-outline-success btn-success">View Details</a>
                     </div>
                 </div>
-                <% }) %>
-        </div>
+            </div>
+        <% }) %>
     </div>
+</div>
 
+<%- include('../partials/user/footer') %>
 
-    <%- include('../partials/user/footer') %>
+<script>
+    function syncQuantity() {
+        const qtyVal = document.getElementById('qty-val').value;
+        document.getElementById('cart-quantity').value = qtyVal;
+    }
 
+    const maxQuantity = '<%= product.quantity %>';
 
-        <script>
+    function updateQuantity(change) {
+        const qtyInput = document.getElementById('qty-val');
+        let currentQty = parseInt(qtyInput.value);
+        const maxLimit = 5;
+        currentQty = Math.max(1, Math.min(maxQuantity, maxLimit, currentQty + change));
+        qtyInput.value = currentQty;
+    }
 
-            function syncQuantity() {
-                const qtyVal = document.getElementById('qty-val').value;
-                document.getElementById('cart-quantity').value = qtyVal;
+    function addToWishlist(productId) {
+        fetch('/add-to-wishlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId })
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                return response.json();
             }
+        })
+        .catch(error => console.error('Error:', error))
+    }
 
-            const maxQuantity = '<%= product.quantity %>';
+    function changeImage(thumbnail, index) {
+        const mainImage = document.getElementById('productImage');
+        mainImage.src = thumbnail.src;
+        initZoom(); // Reinitialize zoom when changing image
+    }
 
-            function updateQuantity(change) {
-                const qtyInput = document.getElementById('qty-val');
-                let currentQty = parseInt(qtyInput.value);
-                const maxLimit = 5;
-                currentQty = Math.max(1, Math.min(maxQuantity, maxLimit, currentQty + change));
-                qtyInput.value = currentQty;
-            }
+    function initZoom() {
+        const productImage = document.getElementById('productImage');
+        const zoomLens = document.querySelector('.zoom-lens');
+        const zoomResult = document.querySelector('.zoom-result');
+        const productImageContainer = document.querySelector('.product-image-container');
 
-            function addToWishlist(productId) {
-                fetch('/add-to-wishlist', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ productId })
-                })
-                    .then(response => {
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        } else {
-                            return response.json();
-                        }
-                    })
-                    .catch(error => console.error('Error:', error))
-            }
+        productImageContainer.addEventListener('mouseenter', showZoom);
+        productImageContainer.addEventListener('mouseleave', hideZoom);
+        productImage.addEventListener('mousemove', moveLens);
+        productImage.addEventListener('touchmove', moveLens);
 
-        </script>
+        function showZoom() {
+            zoomLens.style.display = 'block';
+            zoomResult.style.display = 'block';
+        }
+
+        function hideZoom() {
+            zoomLens.style.display = 'none';
+            zoomResult.style.display = 'none';
+        }
+
+        function moveLens(e) {
+            e.preventDefault();
+            const pos = getCursorPos(e);
+            let x = pos.x - (zoomLens.offsetWidth / 2);
+            let y = pos.y - (zoomLens.offsetHeight / 2);
+
+            if (x > productImage.width - zoomLens.offsetWidth) {x = productImage.width - zoomLens.offsetWidth;}
+            if (x < 0) {x = 0;}
+            if (y > productImage.height - zoomLens.offsetHeight) {y = productImage.height - zoomLens.offsetHeight;}
+            if (y < 0) {y = 0;}
+
+            zoomLens.style.left = x + "px";
+            zoomLens.style.top = y + "px";
+
+            const cx = zoomResult.offsetWidth / zoomLens.offsetWidth;
+            const cy = zoomResult.offsetHeight / zoomLens.offsetHeight;
+
+            zoomResult.style.backgroundImage = `url('${productImage.src}')`;
+            zoomResult.style.backgroundSize = (productImage.width * cx) + "px " + (productImage.height * cy) + "px";
+            zoomResult.style.backgroundPosition = "-" + (x * cx) + "px -" + (y * cy) + "px";
+        }
+
+        function getCursorPos(e) {
+            let a, x = 0, y = 0;
+            e = e || window.event;
+            a = productImage.getBoundingClientRect();
+            x = e.pageX - a.left;
+            y = e.pageY - a.top;
+            x = x - window.pageXOffset;
+            y = y - window.pageYOffset;
+            return {x : x, y : y};
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initZoom);
+</script>
+

@@ -108,6 +108,16 @@
   </section>
 
   <script>
+
+function handleSubmit(){
+  fetch('/admin/addbrand',{
+    method: POST,
+    headers: {
+      'content-type': 'application/json'
+    },
+  })
+}
+
     function previewImage(event) {
       const reader = new FileReader();
       reader.onload = function () {

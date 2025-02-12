@@ -1,5 +1,63 @@
 <%- include('../partials/user/header') %>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+    .tab-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .search-container {
+        flex-grow: 1;
+        max-width: 400px;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 8px 15px;
+        border: none;
+        outline: none;
+        font-size: 14px;
+    }
+
+    .search-button {
+        background-color: #088178;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background-color 0.3s;
+    }
+
+    .search-button:hover {
+        background-color: #2a9d64;
+    }
+
+    @media (max-width: 768px) {
+        .tab-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-container {
+            max-width: 100%;
+            order: -1;
+            margin-bottom: 10px;
+        }
+    }
+</style>
 
 <main class="main">
     <section class="product-tabs section-padding position-relative wow fadeIn animated">
@@ -19,6 +77,16 @@
                         <option value="alphabetical-a-z">Alphabetical (A-Z)</option>
                         <option value="alphabetical-z-a">Alphabetical (Z-A)</option>
                     </select>
+                </div>
+                <div class="search-container">
+                    <div class="search-box">
+                        <form action="/search-products" method="get">
+                        <input type="text" id="search-input" class="search-input" placeholder="Search products..." name="q">
+                        <button class="search-button">
+                            <i class="material-icons">search</i>
+                        </button>
+                    </form>
+                    </div>
                 </div>
                 <div>
                     <select id="cat-filter" class="sort-select" onchange="catFilter()">
@@ -40,7 +108,7 @@
                                 <div class="product-img-action-wrap">
                                     <div class="product-img product-img-zoom">
                                         <a href="/productdetails?id=<%= products[i]._id %>">
-                                            <img class="default-img" src="/uploads/re-image/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>">
+                                            <img class="default-img" src="/uploads/images/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>">
                                         </a>
                                     </div>
                                 </div>
@@ -128,6 +196,7 @@
 </main>
 
 <script>
+  
     function catFilter() {
         const selectedCategory = document.getElementById('cat-filter').value;
 
@@ -170,7 +239,7 @@
                         <div class="product-img-action-wrap">
                             <div class="product-img product-img-zoom">
                                 <a href="/productdetails?id=${product._id}">
-                                    <img class="default-img" src="/uploads/re-image/${product.productImage[0]}" alt="${product.productName}">
+                                    <img class="default-img" src="/uploads/images/${product.productImage[0]}" alt="${product.productName}">
                                 </a>
                             </div>
                         </div>

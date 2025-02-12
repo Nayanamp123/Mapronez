@@ -18,9 +18,11 @@ app.use(express.urlencoded({extended:true}));
 app.use(session({
     secret:process.env.SESSION_SECRET,
     resave:false,
-    saveUninitialized:false,
+    saveUninitialized:true,
     cookie:{
-        secure: process.env.NODE_ENV === 'production'
+        secure:false,
+        httpOnly:true,
+        maxAge:72*60*60*1000
     }
 }))
 
@@ -35,9 +37,9 @@ app.use((req, res, next) => {
 })
 
 app.set('view engine','ejs');
-app.set('views',[path.join(__dirname,'views/user'),
-                path.join(__dirname,'views/admin')]);
-
+app.set('views',[path.join(__dirname,'views/user'),path.join(__dirname,'views/admin')]);
+// app.use(express.static('public/evara-backend'));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use('/',userRouter);
 app.use('/admin',adminRouter);

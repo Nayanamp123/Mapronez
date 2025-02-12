@@ -6,6 +6,8 @@ const productController = require('../controllers/user/productController.js')
 const cartController = require('../controllers/user/cartController.js')
 const paymentController = require('../controllers/user/paymentController.js');
 const invoiceController = require('../controllers/user/invoiceController.js');
+const wishlistController= require('../controllers/user/wishlistController.js')
+const walletController  = require('../controllers/user/walletController.js')
 
 const {userAuth} = require('../middlewares/auth.js')
 const User = require('../models/userSchema.js');
@@ -97,6 +99,7 @@ router.post('/verify-otp', userController.verifyOtp)
 router.post('/resend-otp', userController.resendOtp);
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
 router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }), (req, res) => {
+    req.session.user = req.user._id
     res.redirect('/')
 })
 
@@ -125,6 +128,7 @@ router.get('/delete-address', profileController.deleteAddress);
 router.get('/productdetails', productController.getProductDetails);
 
 router.get('/all-products',productController.getAllProducts);
+router.get('/search-products',productController.searchProduct)
 router.get('/brands',productController.getBrands);
 
 
@@ -135,28 +139,41 @@ router.post('/remove-cart-item', cartController.removeCartItem);
 router.post('/update-cart-quantity', cartController.updateCart);
 
 router.get('/checkout', productController.getCheckout);
-// router.post('/place-order', productController.placeOrder);
-// router.post('/place-order-initial',productController.placeOrderInitial);
+router.post('/place-order', productController.placeOrder);
+router.post('/place-order-initial',productController.placeOrderInitial);
 // router.post('/retry-payment',paymentController.retryPayment);
-// router.get('/payment-failed',paymentController.paymentFailed);
-// router.post('/wallet-payment',paymentController.walletPayment);
+router.get('/payment-failed',paymentController.paymentFailed);
+router.post('/wallet-payment',paymentController.walletPayment);
 
-// router.post('/create-order', paymentController.createOrder);
-// router.post('/verify-payment', paymentController.verifyPayment);
-// router.get('/razorpay-key', paymentController.getRazorpayKey);
-// router.get('/get-address/:id', paymentController.getAddress);
+router.post('/create-order', paymentController.createOrder);
+router.post('/verify-payment', paymentController.verifyPayment);
+router.get('/razorpay-key', paymentController.getRazorpayKey);
+router.get('/get-address/:id', paymentController.getAddress);
 
-// router.get('/order-confirmation', productController.orderConfirm);
-// router.get('/orders', productController.getOrders);
-// router.get('/cancel-order', productController.cancelOrder);
-// router.post('/return-request',productController.returnOrder);
-// router.get('/order-details', productController.orderDetails);
-// router.get('/download-invoice',invoiceController.downloadInvoice)
+router.get('/order-confirmation', productController.orderConfirm);
+router.get('/orders', productController.getOrders);
+router.get('/cancel-order', productController.cancelOrder);
+router.post('/return-request',productController.returnOrder);
+router.get('/order-details', productController.orderDetails);
+router.get('/download-invoice',invoiceController.downloadInvoice)
+
+//wishlist management
+router.get('/wishlist',wishlistController.getWishList)
+router.post('/add-to-wishlist',wishlistController.addToWishlist)
+router.post('/remove-wishlist-item',wishlistController.removeItem)
+
+
+router.get('/search-products',productController.searchProduct);
+
+//coupon management
+router.get('/coupons',productController.getCouponList);
+router.post('/apply-coupon', productController.applyCoupon);
+router.post('/remove-coupon', productController.removeCoupon);
 
 
 
-
-
+//wallet management
+router.get('/wallet', walletController.getWallet);
 
 
 module.exports = router;

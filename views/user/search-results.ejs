@@ -1,0 +1,118 @@
+<%- include('../partials/user/header') %>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<main class="main">
+    <section class="search-results section-padding">
+        <div class="container wow fadeIn animated">
+            <h1 class="section-title">Search Results for "<%= searchTerm %>"</h1><br>
+
+            <!-- Sorting and Filtering -->
+            <div class="tab-header">
+                <div class="sorting-container">
+                    <label for="sort-by" class="sort-label">Sort by:</label>
+                    <select id="sort-by" class="sort-select" onchange="handleSortChange()">
+                        <option value="default">Default</option>
+                        <option value="popularity">Popularity</option>
+                        <option value="price-low-high">Price: Low to High</option>
+                        <option value="price-high-low">Price: High to Low</option>
+                        <option value="rating">Average Rating</option>
+                        <option value="new-arrivals">New Arrivals</option>
+                        <option value="alphabetical-a-z">Alphabetical (A-Z)</option>
+                        <option value="alphabetical-z-a">Alphabetical (Z-A)</option>
+                    </select>
+                </div>
+                
+                <form action="/search-products" method="get">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search products..." name="q">
+                    <button class="search-button">
+                        <i class="material-icons">search</i>
+                    </button>
+                </form>
+                
+            </div><br><br>
+
+            <% if (products.length > 0) { %>
+                <div class="row product-grid-4" id="products-container">
+                    <% products.forEach(product => { %>
+                        <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                            <div class="product-cart-wrap mb-30">
+                                <div class="product-img-action-wrap">
+                                    <div class="product-img product-img-zoom">
+                                        <a href="/productdetails?id=<%= product._id %>">
+                                            <img class="default-img" src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>">
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="product-content-wrap">
+                                    <h4><%= product.productName %></h4>
+                                    <p>Category: <%= product.category.name %></p>
+                                    <h5>₹<%= product.salePrice.toLocaleString() %></h5>
+                                    <p>Rating: <%= product.rating !== undefined ? product.rating : 'N/A' %></p>
+                                    <% if (product.quantity > 0) { %>
+                                        <span class="text-success"><%= product.quantity %> stocks left</span>
+                                    <% } else { %>
+                                        <span class="text-danger">Out of Stock</span>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p>No products found matching your search criteria.</p>
+            <% } %>
+        </div>
+        <!-- Pagination Component -->
+        
+    </section>
+</main>
+<%- include('../partials/user/footer') %>
+<script>
+
+    function handleSortChange() {
+        const sortBy = document.getElementById('sort-by').value;
+
+        fetch(`/sort-and-search?sort=${sortBy}&search=<%= searchTerm %>`, {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                updateProductList(data.products);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function updateProductList(products) {
+        const productsContainer = document.getElementById('products-container');
+        productsContainer.innerHTML = '';
+
+        if (products.length === 0) {
+            productsContainer.innerHTML = '<p>No products found.</p>';
+            return;
+        }
+
+        products.forEach(product => {
+            const productHTML = `
+                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                    <div class="product-cart-wrap mb-30">
+                        <div class="product-img-action-wrap">
+                            <div class="product-img product-img-zoom">
+                                <a href="/productdetails?id=${product._id}">
+                                    <img class="default-img" src="/uploads/re-image/${product.productImage[0]}" alt="${product.productName}">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="product-content-wrap">
+                            <h4>${product.productName}</h4>
+                            <h5>₹${product.salePrice.toLocaleString()}</h5>
+                            <p>Rating: ${product.rating !== undefined ? product.rating : 'N/A'}</p>
+                            ${product.quantity > 0
+                                ? `<span class="text-success">${product.quantity} stocks left</span>`
+                                : `<span class="text-danger">Out of Stock</span>`}
+                        </div>
+                    </div>
+                </div>
+            `;
+            productsContainer.insertAdjacentHTML('beforeend', productHTML);
+        });
+    }
+</script>

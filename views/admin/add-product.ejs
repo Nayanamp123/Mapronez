@@ -299,73 +299,178 @@
 
 
         function validateForm() {
-            clearErrorMessages();
-            const name = document.getElementsByName('productName')[0].value;
-            const description = document.getElementById('descriptionid').value;
-            const brand = document.getElementsByName('brand')[0].value;
-            const price = document.getElementsByName('regularPrice')[0].value;
-            const saleprice = document.getElementsByName('salePrice')[0].value;
-            const color = document.getElementsByName('color')[0].value;
-            const category = document.getElementsByName('category')[0].value;
-            const images = document.getElementById('input1')
-            const quantity = document.getElementsByName('quantity')
-            let isValid = true
-            if (name.trim() === "") {
-                displayErrorMessage('productName-error', 'Please enter a product name.');
-                isValid = false;
-            }
+    // Clear previous error messages
+    clearErrorMessages();
 
-            if (description.trim() === "") {
-                displayErrorMessage('description-error', 'Please enter a product description.');
-                isValid = false;
-            }
+    // Get form input values and trim
+    const name = document.getElementsByName('productName')[0].value.trim();
+    const description = document.getElementById('descriptionid').value.trim();
+    const brand = document.getElementsByName('brand')[0].value.trim();
+    const priceInput = document.getElementsByName('regularPrice')[0];
+    const salePriceInput = document.getElementsByName('salePrice')[0];
+    const color = document.getElementsByName('color')[0].value.trim();
+    const category = document.getElementsByName('category')[0].value.trim();
+    const images = document.getElementById('input1');
+    const quantityInput = document.getElementsByName('quantity')[0];
 
-            if (parseInt(quantity) < 0) {
-                displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-                isValid = false;
-            }
+    // Validation flag
+    let isValid = true;
 
-            if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
-                displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-                isValid = false;
-            }
-
-            if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
-                displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-                isValid = false;
-            }
-            if (parseFloat(price) <= parseFloat(saleprice)) {
-                displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-                isValid = false;
-            }
-
-            if (color.trim() === "") {
-                displayErrorMessage('color-error', 'Please enter a color.');
-                isValid = false;
-            }
-
-            if (images.files.length === 0) {
-                displayErrorMessage("images-error", 'Please select an image.');
-                isValid = false;
-            }
-            return isValid;
+    // Strict Number Validation Function
+    function validateStrictPositiveNumber(input, errorElementId, fieldName) {
+        // Remove any non-numeric characters except decimal point
+        let value = input.value.replace(/[^0-9.]/g, '');
+        
+        // Ensure only one decimal point
+        const decimalParts = value.split('.');
+        if (decimalParts.length > 2) {
+            value = decimalParts[0] + '.' + decimalParts.slice(1).join('');
         }
 
-        function displayErrorMessage(elementId, message) {
-            var errorElement = document.getElementById(elementId);
-            errorElement.innerText = message;
-            errorElement.style.display = "block";
+        // Limit to 2 decimal places
+        if (decimalParts.length === 2 && decimalParts[1].length > 2) {
+            value = parseFloat(value).toFixed(2);
         }
 
-        function clearErrorMessages() {
-            const errorElements = document.getElementsByClassName('error-message');
-            Array.from(errorElements).forEach(element => {
-                element.innerText = '';
-            });
-            const errorMessage = document.getElementById('errorMessage');
+        // Parse as float
+        const numericValue = parseFloat(value);
 
+        // Validation checks
+        if (value === '' || isNaN(numericValue) || numericValue <= 0) {
+            displayErrorMessage(errorElementId, `${fieldName} must be a positive number greater than zero.`);
+            input.value = ''; // Clear invalid input
+            input.focus();
+            return false;
         }
 
+        // Update input with cleaned value
+        input.value = numericValue.toFixed(2);
+        return true;
+    }
+
+    // Strict Quantity Validation
+    function validateStrictQuantity(input, errorElementId) {
+        // Remove any non-numeric characters
+        let value = input.value.replace(/[^0-9]/g, '');
+
+        // Parse as integer
+        const numericValue = parseInt(value, 10);
+
+        // Validation checks
+        if (value === '' || isNaN(numericValue) || numericValue <= 0) {
+            displayErrorMessage(errorElementId, 'Quantity must be a positive whole number greater than zero.');
+            input.value = ''; // Clear invalid input
+            input.focus();
+            return false;
+        }
+
+        // Update input with cleaned value
+        input.value = numericValue;
+        return true;
+    }
+
+    // Name validation
+    if (name === "") {
+        displayErrorMessage('productName-error', 'Please enter a product name.');
+        isValid = false;
+    }
+
+    // Description validation
+    if (description === "") {
+        displayErrorMessage('description-error', 'Please enter a product description.');
+        isValid = false;
+    }
+
+    // Strict Quantity Validation
+    const isQuantityValid = validateStrictQuantity(
+        quantityInput, 
+        'quantity-error'
+    );
+    if (!isQuantityValid) {
+        isValid = false;
+    }
+
+    // Strict Price Validations
+    const isRegularPriceValid = validateStrictPositiveNumber(
+        priceInput, 
+        'regularPrice-error', 
+        'Regular Price'
+    );
+    const isSalePriceValid = validateStrictPositiveNumber(
+        salePriceInput, 
+        'salePrice-error', 
+        'Sale Price'
+    );
+
+    if (!isRegularPriceValid || !isSalePriceValid) {
+        isValid = false;
+    }
+
+    // Price Comparison
+    const regularPrice = parseFloat(priceInput.value);
+    const salePrice = parseFloat(salePriceInput.value);
+
+    if (regularPrice <= salePrice) {
+        displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+        isValid = false;
+    }
+
+    // Color validation
+    if (color === "") {
+        displayErrorMessage('color-error', 'Please enter a color.');
+        isValid = false;
+    }
+
+    // Images validation
+    if (images.files.length === 0) {
+        displayErrorMessage("images-error", 'Please select at least one image.');
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+// Prevent manual input of negative or zero values in real-time
+function setupInputValidation() {
+    const inputs = [
+        document.getElementsByName('quantity')[0],
+        document.getElementsByName('regularPrice')[0],
+        document.getElementsByName('salePrice')[0]
+    ];
+
+    inputs.forEach(input => {
+        input.addEventListener('input', function(e) {
+            // Remove non-numeric characters
+            this.value = this.value.replace(/[^0-9.]/g, '');
+        });
+
+        input.addEventListener('paste', function(e) {
+            // Prevent pasting non-numeric content
+            e.preventDefault();
+            const pastedText = e.clipboardData.getData('text/plain').replace(/[^0-9.]/g, '');
+            this.value = pastedText;
+        });
+    });
+}
+
+// Call setup on page load
+document.addEventListener('DOMContentLoaded', setupInputValidation);
+
+function displayErrorMessage(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    if (errorElement) {
+        errorElement.innerText = message;
+        errorElement.style.display = "block";
+    }
+}
+
+function clearErrorMessages() {
+    const errorElements = document.getElementsByClassName('error-message');
+    Array.from(errorElements).forEach(element => {
+        element.innerText = '';
+        element.style.display = "none";
+    });
+}
     </script>
 
     <%- include("../../views/partials/admin/footer") %>

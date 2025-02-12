@@ -225,6 +225,33 @@
             padding-bottom: 0.75rem;
             border-bottom: 2px solid #f3f4f6;
         }
+        
+       .btn-address {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #0E8A6E;  /* Same green as the coupon button */
+        color: white !important;
+        font-weight: 600;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        }
+
+       .btn-address:hover {
+        background-color: #0B6B55;
+        text-decoration: none;
+       }
+
+    /* Add responsive padding */
+    @media (max-width: 768px) {
+        .btn-address {
+            padding: 10px 20px;
+        }
+    }
+
     </style>
 
     <main class="main">
@@ -280,8 +307,14 @@
                                                 </div>
                                                 <% } %>
                             </div>
+                            <div class="text-center mt-4">
+                                <a href="/add-address" class="btn btn-address w-100">Add New Address</a>
+                            </div>
+                            
                         </div>
                     </div>
+
+                    
 
                     <!-- Order Summary Column -->
                     <div class="col-md-6">
@@ -483,10 +516,10 @@
 
                 if (paymentMethod === 'COD') {
                     const finalPrice = document.getElementById('finalPrice').value;
-                    if (finalPrice > 1000) {
+                    if (finalPrice > 50000) {
                         return Swal.fire({
                             title: 'Error',
-                            text: "Caash on Delivery is not available for products above ₹ 1,000",
+                            text: "Caash on Delivery is not available for products above ₹50000 ",
                             icon: 'error',
                             showConfirmButton: true,
                             confirmButtonText: "OK",
@@ -595,6 +628,7 @@
 
                 const options = {
                     key: initialOrderData.razorpayKey,
+                    name:"nayana",
                     amount: orderDetails.amount,
                     currency: orderDetails.currency || 'INR',
                     order_id: orderDetails.id,

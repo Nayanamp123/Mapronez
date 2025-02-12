@@ -7,15 +7,8 @@ const downloadInvoice = async (req, res) => {
     try {
         const { id } = req.query;
         const order = await Order.findById(id).populate('orderedItems.product');
-        const addressDoc = await Address.findOne({ userId: req.session.user });
-        if (!order) {
-            return res.status(404).send("Order not found");
-        }
-        const address = addressDoc.addresses.find((addr) => addr._id.toString() === order.address.toString());
-
-        if (!address) {
-            return res.status(404).send("Address not found");
-        }
+        
+      
 
         const doc = new PDFDocument({ margin: 50 });
 
@@ -28,7 +21,7 @@ const downloadInvoice = async (req, res) => {
         generateHeader(doc);
         doc.moveDown();
 
-        generateCustomerInformation(doc, order, address);
+        generateCustomerInformation(doc, order);
         doc.moveDown();
 
         generateInvoiceTable(doc, order);
@@ -45,12 +38,12 @@ const downloadInvoice = async (req, res) => {
 
 const generateHeader = (doc) => {
     doc
-        .image('/eCommerce/public/evara-frontend/assets/imgs/theme/mobile-king.png', 50, 45, { width: 50 })
+        .image('public/evara-frontend/assets/imgs/theme/mp-perfume-logo-2.jpg', 50, 45, { width: 50 })
         .fillColor('#444444')
         .fontSize(20)
-        .text('Mobile King', 110, 57)
+        .text('MapRoneZ', 110, 57)
         .fontSize(10)
-        .text('Mobile King', 200, 50, { align: 'right' })
+        .text('MapRoneZ', 200, 50, { align: 'right' })
         .moveDown();
 
     doc.strokeColor('#aaaaaa')
@@ -60,10 +53,8 @@ const generateHeader = (doc) => {
         .stroke();
 };
 
-const generateCustomerInformation = async (doc, order, address) => {
+const generateCustomerInformation = async (doc, order) => {
     const customerInfoTop = 100;
-
-    console.log(address.name);
 
     doc
         .fontSize(16)
@@ -75,11 +66,11 @@ const generateCustomerInformation = async (doc, order, address) => {
 
         .text('Bill To:', 300, customerInfoTop + 30)
         .font('Helvetica-Bold')
-        .text(address.name, 300, customerInfoTop + 45)
+        .text(order.address.name, 300, customerInfoTop + 45)
         .font('Helvetica')
-        .text(address.streetAddress, 300, customerInfoTop + 60)
-        .text(`${address.city}, ${address.state} - ${address.pincode}`, 300, customerInfoTop + 75)
-        .text(`Phone: ${address.phone}`, 300, customerInfoTop + 90)
+        .text(order.address.streetAddress, 300, customerInfoTop + 60)
+        .text(`${order.address.city}, ${order.address.state} - ${order.address.pincode}`, 300, customerInfoTop + 75)
+        .text(`Phone: ${order.address.phone}`, 300, customerInfoTop + 90)
         .moveDown();
 
     doc.strokeColor('#aaaaaa')

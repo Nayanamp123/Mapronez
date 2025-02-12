@@ -116,61 +116,147 @@
         });
     });
 
-    function validateAddressForm(event) {
-        // Clear previous error messages
-        document.getElementById('addressTypeErr').innerText = '';
-        document.getElementById('nameErr').innerText = '';
-        document.getElementById('cityErr').innerText = '';
-        document.getElementById('streetAddressErr').innerText = '';
-        document.getElementById('stateErr').innerText = '';
-        document.getElementById('pincodeErr').innerText = '';
-        document.getElementById('phoneErr').innerText = '';
-        document.getElementById('altPhoneErr').innerText = '';
+    function validateAddressForm() {
+    
+    const errorFields = [
+        'addressTypeErr', 'nameErr', 'cityErr', 'streetAddressErr',
+        'stateErr', 'pincodeErr', 'phoneErr', 'altPhoneErr'
+    ];
+    errorFields.forEach(field => {
+        document.getElementById(field).innerText = '';
+    });
 
-        let isValid = true;
+    let isValid = true;
 
-        const name = document.getElementById('name').value;
-        if (name.trim() === '') {
-            document.getElementById('nameErr').innerText = 'Name is required.';
-            isValid = false;
-        }
-
-        const city = document.getElementById('city').value;
-        if (city.trim() === '') {
-            document.getElementById('cityErr').innerText = 'City is required.';
-            isValid = false;
-        }
-
-        const streetAddress = document.getElementById('streetAddress').value; // Changed to streetAddress
-        if (streetAddress.trim() === '') {
-            document.getElementById('streetAddressErr').innerText = 'Street address is required.'; // Changed to streetAddressErr
-            isValid = false;
-        }
-
-        const state = document.getElementById('state').value;
-        if (state.trim() === '') {
-            document.getElementById('stateErr').innerText = 'State is required.';
-            isValid = false;
-        }
-
-        const pincode = document.getElementById('pincode').value;
-        if (pincode.trim() === '' || pincode.toString().length !== 6) {
-            document.getElementById('pincodeErr').innerText = 'Pincode must be 6 digits.';
-            isValid = false;
-        }
-
-        const phone = document.getElementById('phone').value;
-        if (phone.trim() === '' || phone.length < 10) {
-            document.getElementById('phoneErr').innerText = 'Phone number must be at least 10 digits.';
-            isValid = false;
-        }
-
-        const altPhone = document.getElementById('altPhone').value;
-        if (altPhone !== '' && altPhone.length < 10) {
-            document.getElementById('altPhoneErr').innerText = 'Alternate phone number must be at least 10 digits.';
-            isValid = false;
-        }
-
-        return isValid;
+    // Name validation - only letters allowed, no spaces, minimum 6 characters
+    const name = document.getElementById('name').value;
+    const nameRegex = /^[A-Za-z]+$/;
+    if (name.trim() === '') {
+        document.getElementById('nameErr').innerText = 'Name is required.';
+        isValid = false;
+    } else if (!nameRegex.test(name)) {
+        document.getElementById('nameErr').innerText = 'Name should contain only letters, no spaces.';
+        isValid = false;
+    } else if (name.length < 3) {
+        document.getElementById('nameErr').innerText = 'Name must be at least 3 characters.';
+        isValid = false;
     }
+
+    // City validation - only letters allowed, no spaces, minimum 6 characters
+    const city = document.getElementById('city').value;
+    const cityRegex = /^[A-Za-z]+$/;
+    if (city.trim() === '') {
+        document.getElementById('cityErr').innerText = 'City is required.';
+        isValid = false;
+    } else if (!cityRegex.test(city)) {
+        document.getElementById('cityErr').innerText = 'City should contain only letters, no spaces.';
+        isValid = false;
+    } else if (city.length < 3) {
+        document.getElementById('cityErr').innerText = 'City must be at least 3 characters.';
+        isValid = false;
+    }
+
+    // Street address validation - alphanumeric without spaces, minimum 6 characters
+    const streetAddress = document.getElementById('streetAddress').value;
+    const streetRegex = /^[A-Za-z0-9]+$/;
+    if (streetAddress.trim() === '') {
+        document.getElementById('streetAddressErr').innerText = 'Street address is required.';
+        isValid = false;
+    } else if (!streetRegex.test(streetAddress)) {
+        document.getElementById('streetAddressErr').innerText = 'Street address should contain only letters and numbers, no spaces.';
+        isValid = false;
+    } else if (streetAddress.length < 3) {
+        document.getElementById('streetAddressErr').innerText = 'Street address must be at least 3 characters.';
+        isValid = false;
+    }
+
+    // State validation - only letters allowed, no spaces, minimum 6 characters
+    const state = document.getElementById('state').value;
+    const stateRegex = /^[A-Za-z]+$/;
+    if (state.trim() === '') {
+        document.getElementById('stateErr').innerText = 'State is required.';
+        isValid = false;
+    } else if (!stateRegex.test(state)) {
+        document.getElementById('stateErr').innerText = 'State should contain only letters, no spaces.';
+        isValid = false;
+    } else if (state.length < 3) {
+        document.getElementById('stateErr').innerText = 'State must be at least 3 characters.';
+        isValid = false;
+    }
+
+    // Pincode validation - exactly 6 digits
+    const pincode = document.getElementById('pincode').value;
+    const pincodeRegex = /^[0-9]{6}$/;
+    if (pincode.trim() === '') {
+        document.getElementById('pincodeErr').innerText = 'Pincode is required.';
+        isValid = false;
+    } else if (!pincodeRegex.test(pincode)) {
+        document.getElementById('pincodeErr').innerText = 'Pincode must be exactly 6 digits.';
+        isValid = false;
+    }
+
+    // Phone validation - exactly 10 digits
+    const phone = document.getElementById('phone').value;
+    const phoneRegex = /^[0-9]{10}$/;
+    if (phone.trim() === '') {
+        document.getElementById('phoneErr').innerText = 'Phone number is required.';
+        isValid = false;
+    } else if (!phoneRegex.test(phone)) {
+        document.getElementById('phoneErr').innerText = 'Phone number must be exactly 10 digits.';
+        isValid = false;
+    }
+
+    // Alternate phone validation - if provided, must be 10 digits
+    const altPhone = document.getElementById('altPhone').value;
+    if (altPhone.trim() !== '' && !phoneRegex.test(altPhone)) {
+        document.getElementById('altPhoneErr').innerText = 'Alternate phone number must be exactly 10 digits.';
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+// Add input event listeners to provide real-time validation
+document.addEventListener('DOMContentLoaded', function() {
+    // Prevent non-numeric input and spaces for phone and pincode fields
+    const numericInputs = ['phone', 'altPhone', 'pincode'];
+    numericInputs.forEach(id => {
+        const element = document.getElementById(id);
+        element.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (id === 'pincode' && this.value.length > 6) {
+                this.value = this.value.slice(0, 6);
+            }
+            if ((id === 'phone' || id === 'altPhone') && this.value.length > 10) {
+                this.value = this.value.slice(0, 10);
+            }
+        });
+    });
+
+    // Prevent non-alphabetic input and spaces for name, city, and state fields
+    const alphaInputs = ['name', 'city', 'state'];
+    alphaInputs.forEach(id => {
+        const element = document.getElementById(id);
+        element.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^A-Za-z]/g, '');
+        });
+    });
+
+    // Handle street address - allow only alphanumeric characters, no spaces
+    const streetAddress = document.getElementById('streetAddress');
+    streetAddress.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^A-Za-z0-9]/g, '');
+    });
+
+    // Remove keydown event listener to prevent space key for all fields
+    const allInputs = [...numericInputs, ...alphaInputs, 'streetAddress'];
+    allInputs.forEach(id => {
+        const element = document.getElementById(id);
+        element.addEventListener('keydown', function(e) {
+            if (e.key === ' ') {
+                e.preventDefault();
+            }
+        });
+    });
+});
 </script>

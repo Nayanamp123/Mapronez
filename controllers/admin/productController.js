@@ -1,7 +1,10 @@
+const Cart = require('../../models/cartSchema');
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const Brand = require('../../models/brandSchema');
 const User = require('../../models/userSchema');
+const Coupon = require('../../models/couponSchema')
+
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
@@ -21,6 +24,7 @@ const getProductAddPage = async (req, res) => {
         res.status(500).render('page-error', { message: "Failed to load categories and brands" });
     }
 };
+
 
 
 const addProducts = async (req,res) => {
@@ -118,43 +122,144 @@ const getAllProducts = async (req,res) => {
     }
 }
 
+const updateCartPrices = async (productId, newPrice) => {
+    try {
+        console.log('Starting cart price update:', { productId, newPrice });
+        
+        // Find all carts containing this product
+        const carts = await Cart.find({ "items.productId": productId });
+        console.log(`Found ${carts.length} carts containing the product`);
+        
+        // Update each cart
+        const updatePromises = carts.map(async (cart) => {
+            let updated = false;
+            cart.items = cart.items.map(item => {
+                if (item.productId.toString() === productId) {
+                    console.log('Updating cart item:', {
+                        cartId: cart._id,
+                        before: {
+                            price: item.price,
+                            totalPrice: item.totalPrice
+                        }
+                    });
+                    
+                    item.price = newPrice;
+                    item.totalPrice = item.price * item.quantity;
+                    updated = true;
+                    
+                    console.log('After update:', {
+                        price: item.price,
+                        totalPrice: item.totalPrice
+                    });
+                }
+                return item;
+            });
+            
+            if (updated) {
+                await cart.save();
+                console.log(`Updated cart ${cart._id} successfully`);
+            }
+        });
+        
+        await Promise.all(updatePromises);
+        
+        // Verify updates
+        const verificationCart = await Cart.findOne({ "items.productId": productId });
+        if (verificationCart) {
+            const updatedItem = verificationCart.items.find(
+                item => item.productId.toString() === productId
+            );
+            console.log('Verification check:', {
+                cartId: verificationCart._id,
+                itemPrice: updatedItem?.price,
+                expectedPrice: newPrice
+            });
+        }
+        
+        return true;
+    } catch (error) {
+        console.error("Error updating cart prices:", error);
+        throw error;
+    }
+};
+
+const calculateEffectivePrice = (regularPrice, categoryOffer) => {
+    if (!categoryOffer) return regularPrice;
+    const discountAmount = Math.floor(regularPrice * (categoryOffer / 100));
+    return regularPrice - discountAmount;
+};
+
 const addProductOffer = async (req, res) => {
     try {
-      const { productId, percentage } = req.body;
-      const product = await Product.findById(productId);
-  
-      if (!product) {
-        return res.status(404).json({ status: false, message: "Product not found" });
-      }
-  
-      product.productOffer = parseInt(percentage, 10);
-      const category = await Category.findById(product.category);
-      const effectiveOffer = category ? Math.max(percentage, category.categoryOffer) : percentage;
-      product.salePrice = product.regularPrice - Math.floor(product.regularPrice * (effectiveOffer / 100));
-      await product.save();
-  
-      res.json({ status: true });
-    } catch (error) {
-      console.error("Error adding product offer:", error);
-      res.status(500).json({ status: false, message: "Internal server error" });
-    }
-  };
-  
+        const { productId, percentage } = req.body;
+        const product = await Product.findById(productId);
 
-const removeProductOffer = async (req,res) => {
+        if (!product) {
+            return res.status(404).json({ status: false, message: "Product not found" });
+        }
+
+        // Update product offer and sale price
+        product.productOffer = parseInt(percentage, 10);
+        const category = await Category.findById(product.category);
+        const effectiveOffer = category ? Math.max(percentage, category.categoryOffer) : percentage;
+        product.salePrice = product.regularPrice - Math.floor(product.regularPrice * (effectiveOffer / 100));
+        await product.save();
+
+        // Update all carts containing this product
+        await updateCartPrices(productId, product.salePrice);
+
+        res.json({ status: true });
+    } catch (error) {
+        console.error("Error adding product offer:", error);
+        res.status(500).json({ status: false, message: "Internal server error" });
+    }
+};
+
+const removeProductOffer = async (req, res) => {
     try {
+        const { productId } = req.body;
+        const product = await Product.findById(productId);
         
-        const {productId} = req.body;
-        const findProduct = await Product.findOne({_id:productId});
-        findProduct.salePrice = findProduct.regularPrice;
-        findProduct.productOffer = 0;
-        await findProduct.save();
-        return res.json({status:true});
+        if (!product) {
+            return res.status(404).json({ status: false, message: "Product not found" });
+        }
 
+        // Get category and check for category offer
+        const category = await Category.findById(product.category);
+        console.log('Category offer check:', {
+            categoryId: product.category,
+            categoryOffer: category?.categoryOffer
+        });
+
+        // Reset product offer
+        product.productOffer = 0;
+
+        // If category offer exists, apply it
+        if (category && category.categoryOffer > 0) {
+            console.log('Applying category offer:', category.categoryOffer);
+            product.salePrice = calculateEffectivePrice(product.regularPrice, category.categoryOffer);
+        } else {
+            // If no category offer, reset to regular price
+            console.log('No category offer found, resetting to regular price');
+            product.salePrice = product.regularPrice;
+        }
+
+        await product.save();
+        console.log('Updated product prices:', {
+            regularPrice: product.regularPrice,
+            salePrice: product.salePrice,
+            appliedCategoryOffer: category?.categoryOffer || 0
+        });
+
+        // Update all carts containing this product
+        await updateCartPrices(productId, product.salePrice);
+
+        return res.json({ status: true });
     } catch (error) {
-        res.redirect('/admin/pageerror')
+        console.error("Error removing product offer:", error);
+        res.status(500).json({ status: false, message: "Internal server error" });
     }
-}
+};
 
 const blockProduct = async (req,res) => {
     try {
@@ -296,5 +401,6 @@ module.exports = {
     unBlockProduct,
     getEditProduct,
     editProduct,
-    deleteSingleImage
+    deleteSingleImage,
+
 }

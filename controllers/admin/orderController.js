@@ -1,5 +1,6 @@
 const Order = require('../../models/orderSchema');
 const User = require('../../models/userSchema');
+const Product = require('../../models/productSchema')
 
 
 const getOrderPage = async (req,res) => {
@@ -28,16 +29,19 @@ const updateOrderStatus = async (req, res) => {
         const { orderId, newStatus } = req.body;
 
         const order = await Order.findById(orderId);
+       
         if (order) {
-            if (newStatus === 'Cancelled') {
-                for (const item of order.items) {
-                    await Product.findByIdAndUpdate(item.productId, {
-                        $inc: { stock: item.quantity }
+            if (newStatus === 'Cancelled' || newStatus === "Returned") {
+                for (const item of order.orderedItems) {
+                    await Product.findByIdAndUpdate(item.product, {
+                        $inc: { quantity : item.quantity }
                     });
                 }
             }
-            await Order.findByIdAndUpdate(orderId, { status: newStatus });
 
+
+             await Order.findByIdAndUpdate(orderId, { status: newStatus });
+              
             return res.json({ success: true });
         } else {
             res.json({ success: false, message: 'Order not found' });

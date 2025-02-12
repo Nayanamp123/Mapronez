@@ -237,52 +237,136 @@
 
 
         function validateForm() {
+    // Clear previous error messages
     clearErrorMessages();
-    const name = document.getElementsByName('productName')[0].value.trim();
-    const description = document.getElementsByName('description')[0].value.trim();
-    const brand = document.getElementsByName('brand')[0].value;
-    const price = document.getElementsByName('regularPrice')[0].value;
-    const salePrice = document.getElementsByName('salePrice')[0].value;
-    const color = document.getElementsByName('color')[0].value;
-    const category = document.getElementsByName('category')[0].value;
-    const quantity = document.getElementsByName('quantity')[0].value;
-    const images = document.getElementById('input1');
+
+    // Get form elements
+    const nameInput = document.getElementsByName('productName')[0];
+    const descriptionInput = document.getElementsByName('description')[0];
+    const brandInput = document.getElementsByName('brand')[0];
+    const priceInput = document.getElementsByName('regularPrice')[0];
+    const salePriceInput = document.getElementsByName('salePrice')[0];
+    const colorInput = document.getElementsByName('color')[0];
+    const categoryInput = document.getElementsByName('category')[0];
+    const quantityInput = document.getElementsByName('quantity')[0];
+    const imageInput = document.getElementById('input1');
     const imageDatas = document.getElementById("imageDatas")?.value;
 
     let isValid = true;
 
-    if (name === "") {
+    // Validation helper function for positive numbers
+    function validatePositiveNumber(input, errorElementId, fieldName) {
+        // Sanitize input: remove non-numeric characters except decimal point
+        let value = input.value.replace(/[^0-9.]/g, '');
+        
+        // Ensure only one decimal point
+        const decimalParts = value.split('.');
+        if (decimalParts.length > 2) {
+            value = decimalParts[0] + '.' + decimalParts.slice(1).join('');
+        }
+
+        // Limit to 2 decimal places
+        if (decimalParts.length === 2 && decimalParts[1].length > 2) {
+            value = parseFloat(value).toFixed(2);
+        }
+
+        // Parse as float
+        const numericValue = parseFloat(value);
+
+        // Validation checks
+        if (value === '' || isNaN(numericValue) || numericValue <= 0) {
+            displayErrorMessage(errorElementId, `${fieldName} must be a positive number greater than zero.`);
+            input.value = ''; // Clear invalid input
+            input.focus();
+            return { 
+                isValid: false, 
+                value: null 
+            };
+        }
+
+        // Update input with cleaned value
+        input.value = numericValue.toFixed(2);
+        return { 
+            isValid: true, 
+            value: numericValue 
+        };
+    }
+
+    // Validation helper function for positive integers
+    function validatePositiveInteger(input, errorElementId, fieldName) {
+        // Sanitize input: remove non-numeric characters
+        let value = input.value.replace(/[^0-9]/g, '');
+
+        // Parse as integer
+        const numericValue = parseInt(value, 10);
+
+        // Validation checks
+        if (value === '' || isNaN(numericValue) || numericValue <= 0) {
+            displayErrorMessage(errorElementId, `${fieldName} must be a positive number greater than zero.`);
+            input.value = ''; // Clear invalid input
+            input.focus();
+            return { 
+                isValid: false, 
+                value: null 
+            };
+        }
+
+        // Update input with cleaned value
+        input.value = numericValue;
+        return { 
+            isValid: true, 
+            value: numericValue 
+        };
+    }
+
+    // Validate Name
+    if (nameInput.value.trim() === "") {
         displayErrorMessage('productName-error', 'Please enter a product name.');
         isValid = false;
     }
 
-    if (description === "") {
+    // Validate Description
+    if (descriptionInput.value.trim() === "") {
         displayErrorMessage('description-error', 'Please enter a product description.');
         isValid = false;
     }
 
-    const quantityNum = parseInt(quantity, 10);
-    if (isNaN(quantityNum) || quantityNum < 0) {
-        displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
+    // Validate Quantity
+    const quantityValidation = validatePositiveInteger(
+        quantityInput, 
+        'quantity-error', 
+        'Quantity'
+    );
+    if (!quantityValidation.isValid) {
         isValid = false;
     }
 
-    const priceNum = parseFloat(price);
-    const salePriceNum = parseFloat(salePrice);
-
-    if (isNaN(priceNum) || priceNum < 0) {
-        displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+    // Validate Regular Price
+    const regularPriceValidation = validatePositiveNumber(
+        priceInput, 
+        'regularPrice-error', 
+        'Regular Price'
+    );
+    if (!regularPriceValidation.isValid) {
         isValid = false;
     }
 
-    if (isNaN(salePriceNum) || salePriceNum < 0) {
-        displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
+    // Validate Sale Price
+    const salePriceValidation = validatePositiveNumber(
+        salePriceInput, 
+        'salePrice-error', 
+        'Sale Price'
+    );
+    if (!salePriceValidation.isValid) {
         isValid = false;
     }
 
-    if (priceNum <= salePriceNum) {
-        displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-        isValid = false;
+    // Compare Prices
+    if (regularPriceValidation.isValid && salePriceValidation.isValid) {
+        if (regularPriceValidation.value <= salePriceValidation.value  ) {
+            displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+            isValid = false;
+        }
     }
 
     if (color.trim() === "") {

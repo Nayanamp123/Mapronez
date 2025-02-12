@@ -1,16 +1,18 @@
+const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const Order = require('../../models/orderSchema');
 const Address = require('../../models/addressSchema');
+const Wallet = require('../../models/walletSchema');
 const Product = require('../../models/productSchema');
 const env = require('dotenv').config();
 
-// const razorpay = new Razorpay({
-//     key_id: process.env.RAZOR_KEY_ID,
-//     key_secret: process.env.RAZOR_SECRET,
-// });
+const razorpay = new Razorpay({
+    key_id: process.env.RAZOR_KEY_ID,
+    key_secret: process.env.RAZOR_SECRET,
+});
 
-// const RAZORPAY_MAX_AMOUNT = 5000000000;
-// const RAZORPAY_MIN_AMOUNT = 100;
+const RAZORPAY_MAX_AMOUNT = 5000000000;
+const RAZORPAY_MIN_AMOUNT = 100;
 
 const createOrder = async (req, res) => {
     try {
@@ -80,7 +82,9 @@ const createOrder = async (req, res) => {
             id: razorpayOrder.id,
             amount: razorpayOrder.amount,
             currency: razorpayOrder.currency,
-            receipt: razorpayOrder.receipt
+            receipt: razorpayOrder.receipt,
+            name:'MAPRONEZ',
+            description:"A perfume app that helps users discover, compare, and purchase fragrances based on their preferences."
         });
 
     } catch (error) {
@@ -242,137 +246,140 @@ const getOrderDetails = async (req, res) => {
     }
 }
 
-// const retryPayment = async (req, res) => {
-//     const orderId = req.body.orderId || req.query.orderId;
+const retryPayment = async (req, res) => {
+    const orderId = req.body.orderId || req.query.orderId;
 
-//     const order = await Order.findById(orderId);
-//     if (!order) {
-//         return res.status(404).json({ success: false, message: 'Order not found' });
-//     }
+    const order = await Order.findById(orderId);
+    if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+    }
 
-//     try {
-//         const razorpayOrder = await razorpay.orders.create({
-//             amount: order.finalAmount * 100,
-//             currency: order.currency,
-//             receipt: `order_rcptid_${order.id}`,
-//         });
+    try {
+        const razorpayOrder = await razorpay.orders.create({
+            amount: order.finalAmount * 100,
+            currency: order.currency,
+            receipt: `order_rcptid_${order.id}`,
+        });
 
-//         req.session.razorpayOrderId = razorpayOrder.id;
-//         req.session.razorpayOrderExpiry = Date.now() + (30 * 60 * 1000);
+        req.session.razorpayOrderId = razorpayOrder.id;
+        req.session.razorpayOrderExpiry = Date.now() + (30 * 60 * 1000);
 
-//         res.json({
-//             success: true,
-//             razorpayOrderId: razorpayOrder.id,
-//             razorpayKey: process.env.RAZOR_KEY_ID,
-//             amount: order.finalAmount,
-//             currency: order.currency
-//         });
-//     } catch (error) {
-//         console.error(error)
-//         res.status(500).json({ success: false, message: 'Failed to create Razorpay order' });
-//     }
-// }
+        res.json({
+            success: true,
+            razorpayOrderId: razorpayOrder.id,
+            razorpayKey: process.env.RAZOR_KEY_ID,
+            amount: order.finalAmount,
+            currency: order.currency
+        });
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ success: false, message: 'Failed to create Razorpay order' });
+    }
+}
 
-// const paymentFailed = async (req, res) => {
-//     try {
+const paymentFailed = async (req, res) => {
+    try {
 
-//         const { errorReference, message } = req.query;
-//         const orderId = req.query.id;
-//         res.render('payment-failed', { errorReference, message, orderId });
+        const { errorReference, message } = req.query;
+        const orderId = req.query.id;
+        res.render('payment-failed', { errorReference, message, orderId });
 
-//     } catch (error) {
+    } catch (error) {
 
-//     }
-// }
+    }
+}
 
-// const walletPayment = async (req, res) => {
-//     try {
-//         const { cart, totalPrice, addressId, singleProduct, finalPrice, coupon, discount } = req.body;
-//         const userId = req.session.user;
+const walletPayment = async (req, res) => {
+    try {
+        const { cart, totalPrice, addressId, singleProduct, finalPrice, coupon, discount } = req.body;
+        const userId = req.session.user;
 
-//         if (!userId || !finalPrice || (!cart && !singleProduct)) {
-//             return res.status(400).json({ success: false, message: 'Missing required fields.' });
-//         }
+        if (!userId || !finalPrice || (!cart && !singleProduct)) {
+            return res.status(400).json({ success: false, message: 'Missing required fields.' });
+        }
 
-//         const wallet = await Wallet.findOne({ userId });
-//         if (!wallet) {
-//             return res.status(400).json({ success: false, message: 'Wallet not found.' });
-//         }
+        const wallet = await Wallet.findOne({ userId });
+        if (!wallet) {
+            return res.status(400).json({ success: false, message: 'Wallet not found.' });
+        }
 
-//         const amount = parseFloat(finalPrice);
-//         if (isNaN(amount) || amount <= 0) {
-//             return res.status(400).json({ success: false, message: 'Invalid final price.' });
-//         }
+        const amount = parseFloat(finalPrice);
+        if (isNaN(amount) || amount <= 0) {
+            return res.status(400).json({ success: false, message: 'Invalid final price.' });
+        }
 
-//         if (wallet.balance < amount) {
-//             return res.status(400).json({ success: false, message: 'Insufficient wallet balance.' });
-//         }
+        if (wallet.balance < amount) {
+            return res.status(400).json({ success: false, message: 'Insufficient wallet balance.' });
+        }
 
-//         let orderedItems = [];
-//         if (singleProduct) {
-//             const product = JSON.parse(singleProduct);
-//             orderedItems.push({
-//                 product: product._id,
-//                 quantity: 1,
-//                 price: product.salePrice,
-//             });
-//             await Product.findByIdAndUpdate(product._id, {
-//                 $inc: { quantity: -1 },
-//             });
-//         } else if (cart) {
-//             const cartItems = JSON.parse(cart);
-//             orderedItems = cartItems.map(item => ({
-//                 product: item.productId,
-//                 quantity: item.quantity,
-//                 price: item.totalPrice / item.quantity,
-//             }));
-//             cartItems.forEach(async item => {
-//                 await Product.findByIdAndUpdate(item.productId, {
-//                     $inc: { quantity: -item.quantity },
-//                 });
-//             });
-//         }
+        let orderedItems = [];
+        if (singleProduct) {
+            const product = JSON.parse(singleProduct);
+            orderedItems.push({
+                product: product._id,
+                quantity: 1,
+                price: product.salePrice,
+            });
+            await Product.findByIdAndUpdate(product._id, {
+                $inc: { quantity: -1 },
+            });
+        } else if (cart) {
+            const cartItems = JSON.parse(cart);
+            orderedItems = cartItems.map(item => ({
+                product: item.productId,
+                quantity: item.quantity,
+                price: item.totalPrice / item.quantity,
+            }));
+            cartItems.forEach(async item => {
+                await Product.findByIdAndUpdate(item.productId, {
+                    $inc: { quantity: -item.quantity },
+                });
+            });
+        }
 
-//         const newOrder = new Order({
-//             orderedItems,
-//             totalPrice,
-//             discount: discount,
-//             finalAmount: finalPrice,
-//             user: userId,
-//             address: addressId,
-//             status: 'Pending',
-//             paymentMethod: 'Wallet',
-//             paymentStatus: 'Completed',
-//             couponCode: coupon,
-//             couponApplied: Boolean(coupon && discount),
-//         });
+        const addressDoc = await Address.findOne({ userId });
+        const address = addressDoc.addresses.find(addr => addr._id.toString() === addressId);
 
-//         await newOrder.save();
+        const newOrder = new Order({
+            orderedItems,
+            totalPrice,
+            discount: discount,
+            finalAmount: finalPrice,
+            user: userId,
+            address: address,
+            status: 'Pending',
+            paymentMethod: 'Wallet',
+            paymentStatus: 'Completed',
+            couponCode: coupon,
+            couponApplied: Boolean(coupon && discount),
+        });
 
-//         const walletData = {
-//             $inc: { balance: -newOrder.finalAmount },
-//             $push: { 
-//               transactions: {
-//                 type: "Purchase",
-//                 amount: newOrder.totalPrice,
-//                 orderId: newOrder._id
-//               }
-//             }
-//           }
-      
-//           await Wallet.findOneAndUpdate(
-//             {userId:userId},
-//             walletData,
-//             { upsert: true, new: true }
-//           );
+        await newOrder.save();
+
+        const walletData = {
+            $inc: { balance: -newOrder.finalAmount },
+            $push: {
+                transactions: {
+                    type: "Purchase",
+                    amount: newOrder.totalPrice,
+                    orderId: newOrder._id
+                }
+            }
+        }
+
+        await Wallet.findOneAndUpdate(
+            { userId: userId },
+            walletData,
+            { upsert: true, new: true }
+        );
 
 
-//         res.status(200).json({ success: true, orderId: newOrder._id });
-//     } catch (error) {
-//         console.error("Error processing wallet payment:", error);
-//         res.status(500).json({ success: false, message: 'Failed to process wallet payment. Please try again.' });
-//     }
-// };
+        res.status(200).json({ success: true, orderId: newOrder._id });
+    } catch (error) {
+        console.error("Error processing wallet payment:", error);
+        res.status(500).json({ success: false, message: 'Failed to process wallet payment. Please try again.' });
+    }
+};
 
 
 module.exports = {
@@ -382,6 +389,6 @@ module.exports = {
     getAddress,
     getOrderDetails,
     // retryPayment,
-    // paymentFailed,
-   
+    paymentFailed,
+    walletPayment
 };
