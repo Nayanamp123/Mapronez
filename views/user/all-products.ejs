@@ -1,65 +1,146 @@
 <%- include('../partials/user/header') %>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
+/* Top Search Container Styles */
+.top-search-section {
+    background-color: #f7f7f7;
+    padding: 20px 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.search-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.search-container {
+    width: 100%;
+    position: relative;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #e4e4e4;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.search-box:focus-within {
+    border-color: #088178;
+    box-shadow: 0 2px 4px rgba(8, 129, 120, 0.1);
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    font-size: 16px;
+    color: #333;
+    outline: none;
+    width: 100%;
+}
+
+.search-input::placeholder {
+    color: #aaa;
+    font-size: 15px;
+}
+
+.search-button {
+    background-color: #088178;
+    color: white;
+    border: none;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 20px;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.search-button:hover {
+    background-color: #066c65;
+}
+
+.search-button .material-icons {
+    font-size: 20px;
+}
+
+/* Product Section Styles */
+.product-tabs {
+    padding-top: 20px;
+}
+
+.tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.sorting-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sort-label {
+    margin-bottom: 0;
+}
+
+.sort-select {
+    padding: 8px;
+    border: 1px solid #e4e4e4;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
     .tab-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
+        flex-direction: column;
         gap: 15px;
     }
-
-    .search-container {
-        flex-grow: 1;
-        max-width: 400px;
+    
+    .sorting-container {
+        width: 100%;
     }
-
-    .search-box {
-        display: flex;
-        align-items: center;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        overflow: hidden;
+    
+    .sort-select {
+        width: 100%;
     }
+}
 
+@media (max-width: 576px) {
     .search-input {
-        flex: 1;
-        padding: 8px 15px;
-        border: none;
-        outline: none;
-        font-size: 14px;
+        padding: 10px 12px;
     }
-
+    
     .search-button {
-        background-color: #088178;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        transition: background-color 0.3s;
+        padding: 10px 15px;
     }
-
-    .search-button:hover {
-        background-color: #2a9d64;
-    }
-
-    @media (max-width: 768px) {
-        .tab-header {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .search-container {
-            max-width: 100%;
-            order: -1;
-            margin-bottom: 10px;
-        }
-    }
+}
 </style>
 
 <main class="main">
+    <!-- Top Search Section -->
+    <section class="top-search-section">
+        <div class="search-wrapper">
+            <div class="search-container">
+                <form action="/search-products" method="get" class="search-box">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search for products..." name="q">
+                    <button type="submit" class="search-button">
+                        <i class="material-icons">search</i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <section class="product-tabs section-padding position-relative wow fadeIn animated">
         <div class="container">
             <h3 class="section-title mb-20"><span>All</span> Products</h3>
@@ -78,16 +159,6 @@
                         <option value="alphabetical-z-a">Alphabetical (Z-A)</option>
                     </select>
                 </div>
-                <div class="search-container">
-                    <div class="search-box">
-                        <form action="/search-products" method="get">
-                        <input type="text" id="search-input" class="search-input" placeholder="Search products..." name="q">
-                        <button class="search-button">
-                            <i class="material-icons">search</i>
-                        </button>
-                    </form>
-                    </div>
-                </div>
                 <div>
                     <select id="cat-filter" class="sort-select" onchange="catFilter()">
                         <option value="all-categories">All Categories</option>
@@ -98,7 +169,7 @@
                         <% } %>
                     </select>
                 </div>
-            </div><br><br>
+            </div>
 
             <div class="tab-content wow fadeIn animated" id="myTabContent">
                 <div class="row product-grid-4" id="products-container">
@@ -131,72 +202,72 @@
                 </div>
             </div>
         </div>
+
         <!-- Pagination Component -->
-            <div class="pagination-area mt-15 mb-50 container">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-start">
-                        <!-- Previous Button -->
-                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-                            <a class="page-link d-flex justify-content-center align-items-center" 
-                            href="<%= currentPage === 1 ? '#' : `?page=${currentPage - 1}` %>"
-                            <%= currentPage === 1 ? 'aria-disabled="true"' : '' %>>
-                                <span class="material-icons">chevron_left</span>
-                            </a>
+        <div class="pagination-area mt-15 mb-50 container">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-start">
+                    <!-- Previous Button -->
+                    <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                        <a class="page-link d-flex justify-content-center align-items-center" 
+                        href="<%= currentPage === 1 ? '#' : `?page=${currentPage - 1}` %>"
+                        <%= currentPage === 1 ? 'aria-disabled="true"' : '' %>>
+                            <span class="material-icons">chevron_left</span>
+                        </a>
+                    </li>
+
+                    <!-- Page Numbers -->
+                    <% 
+                    let startPage = Math.max(1, currentPage - 2);
+                    let endPage = Math.min(totalPages, startPage + 4);
+                    
+                    if (endPage - startPage < 4) {
+                        startPage = Math.max(1, endPage - 4);
+                    }
+                    
+                    if (startPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">1</a>
                         </li>
-
-                        <!-- Page Numbers -->
-                        <% 
-                        let startPage = Math.max(1, currentPage - 2);
-                        let endPage = Math.min(totalPages, startPage + 4);
-                        
-                        if (endPage - startPage < 4) {
-                            startPage = Math.max(1, endPage - 4);
-                        }
-                        
-                        if (startPage > 1) { %>
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1">1</a>
-                            </li>
-                            <% if (startPage > 2) { %>
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
-                            <% } %>
-                        <% } %>
-
-                        <% for(let i = startPage; i <= endPage; i++) { %>
-                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        <% if (startPage > 2) { %>
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
                             </li>
                         <% } %>
+                    <% } %>
 
-                        <% if (endPage < totalPages) { %>
-                            <% if (endPage < totalPages - 1) { %>
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
-                            <% } %>
-                            <li class="page-item">
-                                <a class="page-link" href="?page=<%= totalPages %>"><%= totalPages %></a>
-                            </li>
-                        <% } %>
-
-                        <!-- Next Button -->
-                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-                            <a class="page-link d-flex justify-content-center align-items-center" 
-                            href="<%= currentPage === totalPages ? '#' : `?page=${currentPage + 1}` %>"
-                            <%= currentPage === totalPages ? 'aria-disabled="true"' : '' %>>
-                                <span class="material-icons">chevron_right</span>
-                            </a>
+                    <% for(let i = startPage; i <= endPage; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
                         </li>
-                    </ul>
-                </nav>
-            </div>
+                    <% } %>
+
+                    <% if (endPage < totalPages) { %>
+                        <% if (endPage < totalPages - 1) { %>
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        <% } %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= totalPages %>"><%= totalPages %></a>
+                        </li>
+                    <% } %>
+
+                    <!-- Next Button -->
+                    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                        <a class="page-link d-flex justify-content-center align-items-center" 
+                        href="<%= currentPage === totalPages ? '#' : `?page=${currentPage + 1}` %>"
+                        <%= currentPage === totalPages ? 'aria-disabled="true"' : '' %>>
+                            <span class="material-icons">chevron_right</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </section>
 </main>
 
 <script>
-  
     function catFilter() {
         const selectedCategory = document.getElementById('cat-filter').value;
 
@@ -249,8 +320,8 @@
                             <h6 style="text-decoration: line-through; color: rgb(164, 103, 103);">₹${product.regularPrice.toLocaleString()}</h6>
                             <p>Rating: ${product.rating !== undefined ? product.rating : 'N/A'}</p>
                             ${product.quantity > 0
-                    ? `<span class="text-success">${product.quantity} stocks left</span>`
-                    : `<span class="text-danger">Out of Stock</span>`}
+                ? `<span class="text-success">${product.quantity} stocks left</span>`
+                : `<span class="text-danger">Out of Stock</span>`}
                         </div>
                     </div>
                 </div>

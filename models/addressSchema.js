@@ -6,12 +6,15 @@ const addressSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
+    index: true, // Index on userId for quick lookups
+
   },
   addresses: [
     {
       addressType: {
         type: String,
         required: true,
+        
       },
       name: {
         type: String,
@@ -32,10 +35,14 @@ const addressSchema = new Schema({
       pincode: {
         type: String,
         required: true,
+        index: true, // Index on pincode for faster searches
+
       },
       phone: {
         type: String,
         required: true,
+        index: true, // Index on phone for quick lookups
+
       },
       altPhone: {
         type: String,

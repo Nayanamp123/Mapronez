@@ -6,12 +6,15 @@ const returnSchema = new Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: 'User'
+      ref: 'User',
+      index: true // Index for faster user-based queries
     },
     orderId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: 'Order'
+      ref: 'Order',
+      index: true // Index for quick lookup by orderId
+
     },
     reason: {
       type: String,
@@ -25,7 +28,9 @@ const returnSchema = new Schema(
     returnStatus: {
       type: String,
       enum: ['pending', 'approved', 'rejected'],
-      default: 'pending'
+      default: 'pending',
+      index: true // Index for efficient filtering by return status
+
     }
   },
   { timestamps: true } 

@@ -15,18 +15,26 @@ const couponSchema = new Schema({
   expireOn: {
     type: Date,
     required: true,
+    index: true, // Index for filtering active/expired coupons
+
   },
   offerPercentage: {
     type: Number,
     required: true,
+    index: true, // Index for sorting/filtering by discount
+
   },
   minimumPrice: {
     type: Number,
     required: true,
+    index: true, // Index for price-based filtering
+
   },
   isList: {
     type: Boolean,
     default: true,
+    index: true, // Index for filtering active/inactive coupons
+
   },
   userId: [
     {
@@ -37,5 +45,5 @@ const couponSchema = new Schema({
 });
 
 const Coupon = mongoose.model("Coupon", couponSchema);
-
+  
 module.exports = Coupon;

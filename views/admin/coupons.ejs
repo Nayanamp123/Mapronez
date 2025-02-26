@@ -56,9 +56,9 @@
                                 <input type="date" class="form-control" id="endDate" name="endDate" />
                                 <small id="endDateError" style="color: red; display: none;">End date is required</small>
                             </div>
-                            <div class="d-grid">
-                                <button class="btn btn-primary" type="submit">Create Coupon</button>
-                            </div>
+                            <div class="d-grid gap-2">
+    <button class="btn btn-primary" type="submit" id="submitButton">Create Coupon</button>
+</div>
                         </form>
                     </div>
                     <div class="col-md-9">
@@ -91,10 +91,18 @@
                                                     <span class="badge rounded-pill alert-danger">Inactive</span>
                                                 </td>
                                             <%}%> -->
+                                                
                                                 <td>
-                                                    <button class="btn btn-danger text-white"
-                                                        onclick="confirmDelete('<%= coupons[i]._id %>')">Delete</button>
+                                                    <button class="btn btn-primary text-white me-2" 
+                                                            onclick="location.href = '/admin/edit-coupon?id=<%= coupons[i]._id %>'">
+                                                        Edit
+                                                    </button>
+                                                    <button class="btn btn-danger text-white" 
+                                                            onclick="confirmDelete('<%= coupons[i]._id %>')">
+                                                        Delete
+                                                    </button>
                                                 </td>
+                                                    
                                             </tr>
                                             <%}%>
                                     </tbody>
@@ -172,6 +180,19 @@
                 }
             });
         }
+        
+
+    // Add a function to reset form
+    function resetForm() {
+        
+      document.getElementById("couponId").value = "";
+      document.getElementById("couponCode").value = "";
+      document.getElementById("discountPercentage").value = "";
+      document.getElementById("minimumPrice").value = "";
+      document.getElementById("endDate").value = "";
+      document.getElementById("submitButton").textContent = "Create Coupon";
+      document.getElementById("createdDate").value = new Date().toISOString().split("T")[0];
+}
 
         function validateCouponForm() {
             let isValid = true;

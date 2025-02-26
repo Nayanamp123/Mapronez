@@ -5,11 +5,13 @@ const userSchema = new Schema({
   username: {
     type: String,
     required: true,
+    index: true // Add index for username searches
   },
   email: {
     type: String,
     required: true,
     unique: true,
+    index: true // Add index since it's unique and frequently queried
   },
   phone: {
     type: String,
@@ -17,11 +19,13 @@ const userSchema = new Schema({
     unique: false,
     sparse: true,
     default: null,
+    index: true // Add index for phone number searches
   },
   googleId: {
     type: String,
-    required:false,
-    sparse: true
+    required: false,
+    sparse: true,
+    index: true // Add index for Google OAuth queries
   },
   password: {
     type: String,
@@ -30,12 +34,14 @@ const userSchema = new Schema({
   isBlocked: {
     type: Boolean,
     default: false,
+    index: true // Add index for filtering blocked users
   },
   isAdmin: {
     type: Boolean,
     default: false,
+    index: true // Add index for filtering admin users
   },
-  addresses:[
+  addresses: [
     {
       type: Schema.Types.ObjectId,
       ref: "Address"
@@ -62,9 +68,11 @@ const userSchema = new Schema({
   createdOn: {
     type: Date,
     default: Date.now,
+    index: true // Add index for date-based queries
   },
   referalCode: {
     type: String,
+    index: true // Add index for referral code lookups
   },
   redeemed: {
     type: Boolean,
@@ -88,10 +96,11 @@ const userSchema = new Schema({
         type: Date,
         default: Date.now,
       },
-      
     },
   ],
-},{ timestamps: true });
+}, { 
+  timestamps: true 
+});
 
 
 

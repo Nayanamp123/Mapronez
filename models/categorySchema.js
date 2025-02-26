@@ -13,15 +13,21 @@ const categorySchema = new Schema({
     },
     isListed:{
         type:Boolean,
-        default:true
+        default:true,
+        index: true, // Index for filtering active/inactive categories
+
     },
     categoryOffer:{
         type:Number,
-        default:0
+        default:0,
+        index: true, // Index for sorting/filtering by discount
+
     },
     createdAt:{
         type:Date,
-        default:Date.now
+        default:Date.now,
+        index: true, // Index for retrieving categories by creation date
+
     }
 })
 

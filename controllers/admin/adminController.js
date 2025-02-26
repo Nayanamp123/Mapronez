@@ -9,7 +9,7 @@ const pageError = async (req, res) => {
         res.render('admin-error')
 
     } catch (error) {
-
+        console.log(error)
     }
 }
 
@@ -327,10 +327,99 @@ const logout = async (req, res) => {
     }
 }
 
+// Get Dashboard Data
+exports.getDashboardData = async (req, res) => {
+    try {
+        // Fetch total sales
+        const totalSales = await Order.aggregate([
+            { $group: { _id: null, totalSalesAmount: { $sum: "$totalAmount" } } }
+        ]);
+        const totalSalesAmount = totalSales.length > 0 ? totalSales[0].totalSalesAmount : 0;
+
+        // Fetch total orders
+        const totalOrders = await Order.countDocuments();
+
+        // Fetch top 10 products
+        const topProducts = await Product.aggregate([
+            { $sort: { totalQuantitySold: -1 } },
+            { $limit: 10 },
+            { $project: { productName: 1, totalQuantitySold: 1 } }
+        ]);
+
+        // Fetch top 10 categories
+        const topCategories = await Category.aggregate([
+            { $sort: { totalQuantitySold: -1 } },
+            { $limit: 10 },
+            { $project: { categoryName: 1, totalQuantitySold: 1 } }
+        ]);
+
+        // Fetch top 10 brands
+        const topBrands = await Brand.aggregate([
+            { $sort: { totalQuantitySold: -1 } },
+            { $limit: 10 },
+            { $project: { brandName: 1, totalQuantitySold: 1 } }
+        ]);
+
+        // Fetch sales data for weekly, monthly, yearly
+        const salesData = {
+            yearly: await getSalesData('yearly'),
+            monthly: await getSalesData('monthly'),
+            weekly: await getSalesData('weekly')
+        };
+
+        res.render('admin/dashboard', {
+            salesData: {
+                totalSalesAmount,
+                yearly: salesData.yearly,
+                monthly: salesData.monthly,
+                weekly: salesData.weekly
+            },
+            totalOrders,
+            topProducts,
+            topCategories,
+            topBrands
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+};
+
+// Helper function to get sales data
+const getSalesData = async (range) => {
+    const now = new Date();
+    let startDate;
+
+    switch (range) {
+        case 'yearly':
+            startDate = new Date(now.getFullYear(), 0, 1);
+            break;
+        case 'monthly':
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            break;
+        case 'weekly':
+            startDate = new Date(now.setDate(now.getDate() - now.getDay()));
+            break;
+    }
+
+    const sales = await Order.aggregate([
+        { $match: { createdAt: { $gte: startDate } } },
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, totalSales: { $sum: "$totalAmount" } } },
+        { $sort: { _id: 1 } }
+    ]);
+
+    return {
+        labels: sales.map(s => s._id),
+        data: sales.map(s => s.totalSales)
+    };
+};
+
+
 module.exports = {
     pageError,
     loadLogin,
     login,
     loadDashboard,
-    logout
+    logout,
+    
 }

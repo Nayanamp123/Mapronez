@@ -1,62 +1,121 @@
-<%- include("../../views/partials/admin/header") %>
+<%- include("../partials/admin/header") %>
 <div class="content-header row">
     <div class="d-flex justify-content-between align-items-center">
         <h2 class="content-title card-title">Customers</h2>
-       
     </div>
-</div>         
-        </div>
-        
-            <header class="card-header text-center mb-20">
-                <form action="/admin/users/" method="get" class="d-inline">
-                    <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
-                        <input type="text" class="form-control border-0 rounded-pill" placeholder="Search customers..." name="search">
-                        <button class="btn  border-0" type="submit">Search</button>
-                    </div>
-                </form>
-            </header>
-            <div class="right mt-5">
-                <table class="table table-striped">
-                    <thead>
-                      <tr>
-                        <th scope="col"><b>Name</b></th>
-                        <th scope="col"><b>Email</b></th>
-                        <th scope="col"><b>Phone No</b></th>
-                        <th scope="col"><b>Action</b></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <%for(let i=0;i<data.length;i++){%>
-                            <tr>
-                                <td><%=data[i].username%></td>
-                                <td><%=data[i].email%></td>
-                                <td><%=data[i].phone%></td>
-                                <td> 
-                                    <%if(data[i].isBlocked===false){%>
-                                        <button class="btn btn-danger" style="width: 80px;">
-                                            <a href="/admin/blockCustomer?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Block</a>
-                                        </button>
-                                        <%}else{%>
-                                        <button class="btn btn-success" style="width: 80px;">
-                                            <a href="/admin/unblockCustomer?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Unblock</a>
-                                        </button> 
-                                        <%}%>
-                                </td>
-                            </tr>
-                            <%}%>
-                    </tbody>
-                  </table>
-        </div>
-        <div class="container mt-3">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
-                    <%for(let i=0;i<=totalPages;i++){%>
-                        <li class="page-item <%=(i===currentPage)? 'active': '' %>">
-                            <a class="page-link"  href="?page=<%=i%>"><%= i %></a>
-
-                        </li>
-                        <%}%>
-                </ul>
-            </nav>
-        </div>
-        <%- include("../../views/partials/admin/footer") %>
+</div>
+<div class="container-fluid">
+    <header class="card-header text-center mb-20">
+        <form action="/admin/users" method="get" class="d-inline">
+            <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
+                <input type="text" class="form-control border-0 rounded-pill" placeholder="Search customers..." name="search" value="<%= typeof search !== 'undefined' ? search : '' %>">
+                <button class="btn border-0" type="submit">Search</button>
+            </div>
+        </form>
+    </header>
+    <div class="right mt-5">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col"><b>Name</b></th>
+                    <th scope="col"><b>Email</b></th>
+                    <th scope="col"><b>Phone No</b></th>
+                    <th scope="col"><b>Action</b></th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (data && data.length > 0) { %>
+                    <% for(let i=0; i<data.length; i++) { %>
+                    <tr>
+                        <td><%= data[i].username %></td>
+                        <td><%= data[i].email %></td>
+                        <td><%= data[i].phone %></td>
+                        <td>
+                            <% if(data[i].isBlocked===false) { %>
+                            <button class="btn btn-danger" style="width: 80px;">
+                                <a href="/admin/blockCustomer?id=<%= data[i]._id %>&page=<%= currentPage %><%= typeof search !== 'undefined' && search ? '&search=' + encodeURIComponent(search) : '' %>" class="text-white" style="text-decoration: none;">Block</a>
+                            </button>
+                            <% } else { %>
+                            <button class="btn btn-success" style="width: 80px;">
+                                <a href="/admin/unblockCustomer?id=<%= data[i]._id %>&page=<%= currentPage %><%= typeof search !== 'undefined' && search ? '&search=' + encodeURIComponent(search) : '' %>" class="text-white" style="text-decoration: none;">Unblock</a>
+                            </button>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% } %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="4" class="text-center">No customers found</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+    <div class="pagination-area mt-15 mb-50 container">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <% 
+                // Base URL path - should be the same as your page path
+                const basePath = '/admin/users';
+                
+                // Helper function to create search query string
+                function getSearchQuery() {
+                    return typeof search !== 'undefined' && search ? '&search=' + encodeURIComponent(search) : '';
+                }
+                
+                // Number of pages to show before and after current page
+                const maxPagesToShow = 5;
+                const pagesOnEachSide = Math.floor(maxPagesToShow / 2);
+                
+                // Calculate start and end page
+                let startPage = Math.max(1, currentPage - pagesOnEachSide);
+                let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+                
+                // Adjust to show maxPagesToShow pages when possible
+                if (endPage - startPage + 1 < maxPagesToShow && startPage > 1) {
+                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                }
+                
+                // Determine if we need to show ellipses
+                const showStartEllipsis = startPage > 1;
+                const showEndEllipsis = endPage < totalPages;
+                %>
+                
+                
+                
+                <!-- Starting ellipsis if needed -->
+                <% if (showStartEllipsis) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="<%= basePath %>?page=1<%= getSearchQuery() %>">1</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                <% } %>
+                
+                <!-- Page numbers -->
+                <% for (let i = startPage; i <= endPage; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="<%= basePath %>?page=<%= i %><%= getSearchQuery() %>"><%= i %></a>
+                    </li>
+                <% } %>                
+                
+                <!-- Ending ellipsis if needed -->
+                <% if (showEndEllipsis) { %>
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="<%= basePath %>?page=<%= totalPages %><%= getSearchQuery() %>"><%= totalPages %></a>
+                    </li>
+                <% } %>
+                
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+<br>
+<br>
+<br>
+<%- include("../partials/admin/footer") %>

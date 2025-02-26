@@ -9,6 +9,8 @@ const bannerSchema = new Schema({
   title: {
     type: String,
     required: true,
+    index: true, // Index for faster banner lookups by title
+
   },
   description: {
     type: String,
@@ -20,10 +22,14 @@ const bannerSchema = new Schema({
   startDate: {
     type: Date,
     required: true,
+    index: true, // Index for filtering banners by start date
+
   },
   endDate: {
     type: Date,
     required: true,
+    index: true, // Index for filtering banners by end date
+
   },
 });
 

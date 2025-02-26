@@ -32,6 +32,8 @@ const orderSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
+    index: true, // Index for faster user-based lookups
+
   },
   orderedItems: [
     {
@@ -62,6 +64,18 @@ const orderSchema = new Schema({
     type: Number,
     required: true,
   },
+  gstAmount: {
+    type: Number,
+    default: 0,
+  },
+  totalWithoutGst: {
+    type: Number,
+    default: 0,
+  },
+  totalWithGst: {
+    type: Number,
+    default: 0,
+  },
   address: {
     type: AddressSchema,
     require: true,
@@ -73,6 +87,7 @@ const orderSchema = new Schema({
   },
   invoiceDate: {
     type: Date,
+    index: true, // Index for sorting by invoice date
   },
   status: {
     type: String,
@@ -86,6 +101,8 @@ const orderSchema = new Schema({
       "Return Request",
       "Returned",
     ],
+    index: true, // Index for filtering by status
+
   },
   couponApplied: {
     type: Boolean,
@@ -93,7 +110,9 @@ const orderSchema = new Schema({
   },
   couponCode:{
     type:String,
-    required:false
+    required:false,
+    index: true, // Index for filtering orders with a specific coupon
+
   },
   paymentMethod: {
     type: String,
@@ -103,7 +122,9 @@ const orderSchema = new Schema({
   paymentStatus: {
     type: String,
     enum: ['Pending', 'Processing', 'Completed', 'Failed'],
-    default: 'Pending'
+    default: 'Pending',
+    index: true, // Index for filtering by payment status
+
   },
   cancellationReason:{
     type:String

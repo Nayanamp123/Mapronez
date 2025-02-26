@@ -67,9 +67,8 @@
                                     <%= order.paymentStatus %>
                                 </span>&nbsp;&nbsp;&nbsp;
                                 <% if (order.paymentStatus==='Pending' && order.paymentMethod==='Online' ) { %>
-                                    <button id="continuePaymentButton" class="btn btn-primary"
-                                        onclick="retryPayment('<%=order._id%>')">Continue Payment</button>
-                                    <% } %>
+                                    <button id="continuePaymentButton" class="btn btn-primary" onclick="retryPayment('<%=order._id%>')">Continue Payment</button>
+                                <% } %>
                         </p>
                         <p>Placed on: <%= order.createdAt.toLocaleString() %>
                         </p>
@@ -78,7 +77,7 @@
                         <h3>Total: <span class="text-primary">₹ <%= order.finalAmount.toLocaleString() %></span></h3>
                     </div>
                 </div>
-
+                
 
                 <!-- Shipment Status -->
                 <div class="shipment-status card mb-4">
@@ -100,6 +99,7 @@
                         <%if(order.status == "Delivered"){%>
                             <a href="/download-invoice?id=<%= order._id %>" class="btn btn-primary">Download Invoice</a>
                         <%}%>
+
                     </div>
                 </div>
 
@@ -153,6 +153,8 @@
                             <h6>Order Summary</h6>
                             <p>Subtotal: ₹<%= order.totalPrice.toLocaleString() %>
                             </p>
+                            <p>Gst: ₹<%= order.gstAmount.toLocaleString() %>
+                            </p>
                             <p>Discount: ₹<%= order.discount.toLocaleString() %>
                             </p>
                             <hr>
@@ -184,6 +186,7 @@
 
                     const options = {
                         key: data.razorpayKey,
+                        name:"MAPRONEZ",
                         amount: data.amount,
                         currency: data.currency,
                         order_id: data.razorpayOrderId,

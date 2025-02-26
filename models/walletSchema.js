@@ -6,18 +6,19 @@ const walletSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
-        unique: true
+        unique: true,
+        index: true  // Index for quick lookups by userId
     },
-    balance:{
-        type:Number,
-        required:true,
-        default:0
+    balance: {
+        type: Number,
+        required: true,
+        default: 0
     },
     transactions: [
         {
             type: {
                 type: String,
-                enum: ['Deposit', 'Withdrawal', 'Purchase', 'Refund', 'Referal'],
+                enum: ['Deposit', 'Withdrawal', 'Purchase', 'Refund', 'referral'],
                 required: true
             },
             amount: {
@@ -27,7 +28,7 @@ const walletSchema = new Schema({
             orderId: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Order',
-                required: function() {
+                required: function () {
                     return this.type === 'Purchase' || this.type === 'Refund';
                 }
             },
@@ -43,7 +44,8 @@ const walletSchema = new Schema({
             },
             date: {
                 type: Date,
-                default: Date.now
+                default: Date.now,
+                index: true  // Index for efficient date-based queries
             }
         }
     ],

@@ -6,10 +6,11 @@ const productController = require('../controllers/user/productController.js')
 const cartController = require('../controllers/user/cartController.js')
 const paymentController = require('../controllers/user/paymentController.js');
 const invoiceController = require('../controllers/user/invoiceController.js');
-const wishlistController= require('../controllers/user/wishlistController.js')
-const walletController  = require('../controllers/user/walletController.js')
+const wishlistController = require('../controllers/user/wishlistController.js')
+const walletController = require('../controllers/user/walletController.js')
 
-const {userAuth} = require('../middlewares/auth.js')
+const { userAuth } = require('../middlewares/auth.js')
+const { validateCoupon } = require('../middlewares/validateCoupon.js')
 const User = require('../models/userSchema.js');
 const passport = require('passport');
 const { loadCategories } = require('../middlewares/loadCategories');
@@ -35,7 +36,7 @@ router.use((req, res, next) => {
     if (!req.session) {
         return next();
     }
-    
+
     if (!req.session.user) {
         res.locals.user = null;
         return next();
@@ -52,7 +53,7 @@ router.use((req, res, next) => {
             next();
         });
 });
-router.use(async(req, res, next) => {
+router.use(async (req, res, next) => {
     const userData = await User.findById(req.session.user);
     res.locals.user = userData || null;
     next();
@@ -92,7 +93,7 @@ router.use(session({
 router.get('/page-not-found', userController.pageNotFound)
 router.get('/', userController.loadHomepage)
 router.get('/sort', userController.sortProducts);
-router.get('/filter-by-category',userController.catFilter)
+router.get('/filter-by-category', userController.catFilter)
 router.get('/signup', userController.loadSignup)
 router.post('/signup', userController.signup)
 router.post('/verify-otp', userController.verifyOtp)
@@ -127,9 +128,10 @@ router.get('/delete-address', profileController.deleteAddress);
 //product details
 router.get('/productdetails', productController.getProductDetails);
 
-router.get('/all-products',productController.getAllProducts);
-router.get('/search-products',productController.searchProduct)
-router.get('/brands',productController.getBrands);
+router.get('/all-products', productController.getAllProducts);
+router.get('/search-products', productController.searchProduct)
+
+router.get('/brands', productController.getBrands);
 
 
 //user cart
@@ -140,10 +142,10 @@ router.post('/update-cart-quantity', cartController.updateCart);
 
 router.get('/checkout', productController.getCheckout);
 router.post('/place-order', productController.placeOrder);
-router.post('/place-order-initial',productController.placeOrderInitial);
-// router.post('/retry-payment',paymentController.retryPayment);
-router.get('/payment-failed',paymentController.paymentFailed);
-router.post('/wallet-payment',paymentController.walletPayment);
+router.post('/place-order-initial', productController.placeOrderInitial);
+router.post('/retry-payment',paymentController.retryPayment);
+router.get('/payment-failed', paymentController.paymentFailed);
+router.post('/wallet-payment', paymentController.walletPayment);
 
 router.post('/create-order', paymentController.createOrder);
 router.post('/verify-payment', paymentController.verifyPayment);
@@ -153,20 +155,21 @@ router.get('/get-address/:id', paymentController.getAddress);
 router.get('/order-confirmation', productController.orderConfirm);
 router.get('/orders', productController.getOrders);
 router.get('/cancel-order', productController.cancelOrder);
-router.post('/return-request',productController.returnOrder);
+router.post('/return-request', productController.returnOrder);
 router.get('/order-details', productController.orderDetails);
-router.get('/download-invoice',invoiceController.downloadInvoice)
+router.get('/download-invoice', invoiceController.downloadInvoice)
 
 //wishlist management
-router.get('/wishlist',wishlistController.getWishList)
-router.post('/add-to-wishlist',wishlistController.addToWishlist)
-router.post('/remove-wishlist-item',wishlistController.removeItem)
+router.get('/wishlist', wishlistController.getWishList)
+router.post('/add-to-wishlist', wishlistController.addToWishlist)
+router.post('/remove-wishlist-item', wishlistController.removeItem)
+router.get('/check-wishlist/:productId', wishlistController.checkWishlistStatus);
 
 
-router.get('/search-products',productController.searchProduct);
+router.get('/search-products', productController.searchProduct);
 
 //coupon management
-router.get('/coupons',productController.getCouponList);
+router.get('/coupons', productController.getCouponList);
 router.post('/apply-coupon', productController.applyCoupon);
 router.post('/remove-coupon', productController.removeCoupon);
 

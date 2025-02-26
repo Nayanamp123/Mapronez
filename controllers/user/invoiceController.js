@@ -126,10 +126,14 @@ const generateInvoiceTable = (doc, order) => {
         .text("₹"+order.totalPrice.toLocaleString(), 470, subtotalPosition + 15, { width: 90, align: 'right' })
         .text('Discount:', 380, subtotalPosition + 30)
         .text("₹"+order.discount.toLocaleString(), 470, subtotalPosition + 30, { width: 90, align: 'right' })
+        .text('Amount (before GST):', 380, subtotalPosition + 45)
+        .text("₹"+(order.totalWithoutGst || (order.totalPrice - order.discount)).toLocaleString(), 470, subtotalPosition + 45, { width: 90, align: 'right' })
+        .text('GST (18%):', 380, subtotalPosition + 60)
+        .text("₹"+(order.gstAmount || ((order.totalPrice - order.discount) * 0.18)).toLocaleString(), 470, subtotalPosition + 60, { width: 90, align: 'right' })
         .fontSize(12)
         .font('Helvetica-Bold')
-        .text('Total:', 380, subtotalPosition + 45)
-        .text("₹"+order.finalAmount.toLocaleString(), 470, subtotalPosition + 45, { width: 90, align: 'right' });
+        .text('Total Amount:', 380, subtotalPosition + 75)
+        .text("₹"+order.finalAmount.toLocaleString(), 470, subtotalPosition + 75, { width: 90, align: 'right' });
 };
 
 const generateFooter = (doc, order) => {

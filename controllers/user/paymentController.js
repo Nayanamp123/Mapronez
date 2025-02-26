@@ -269,7 +269,8 @@ const retryPayment = async (req, res) => {
             razorpayOrderId: razorpayOrder.id,
             razorpayKey: process.env.RAZOR_KEY_ID,
             amount: order.finalAmount,
-            currency: order.currency
+            currency: order.currency,
+            name: 'MAPRONEZ'
         });
     } catch (error) {
         console.error(error)
@@ -353,7 +354,7 @@ const walletPayment = async (req, res) => {
             couponCode: coupon,
             couponApplied: Boolean(coupon && discount),
         });
-
+        // console.log('sf',newOrder.finalAmount)
         await newOrder.save();
 
         const walletData = {
@@ -361,7 +362,7 @@ const walletPayment = async (req, res) => {
             $push: {
                 transactions: {
                     type: "Purchase",
-                    amount: newOrder.totalPrice,
+                    amount: newOrder.finalAmount,
                     orderId: newOrder._id
                 }
             }
@@ -388,7 +389,7 @@ module.exports = {
     getRazorpayKey,
     getAddress,
     getOrderDetails,
-    // retryPayment,
+    retryPayment,
     paymentFailed,
     walletPayment
 };

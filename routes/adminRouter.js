@@ -8,9 +8,11 @@ const productController = require('../controllers/admin/productController')
 const orderController = require('../controllers/admin/orderController');
 const stockController = require('../controllers/admin/stockController');
 const couponController = require('../controllers/admin/couponController');
+const dashboardController=require('../controllers/admin/dashboardController')
 const saleReportController = require('../controllers/admin/salesReportController');
 const returnController = require('../controllers/admin/returnController');
 const {userAuth,adminAuth} = require('../middlewares/auth')
+
 const multer = require('multer');
 const storage = require('../helpers/multer')
 const upload = multer({storage:storage});
@@ -73,10 +75,14 @@ router.post('/update-stock',adminAuth,stockController.updateStock);
 
 
 //coupon management
-router.get('/coupons',adminAuth,couponController.getCouponPage)
-router.post('/save-coupon',adminAuth,couponController.addCoupon)
-router.get('/delete-coupon',adminAuth,couponController.deleteCoupon)
+router.get('/coupons', adminAuth, couponController.getCouponPage);
+router.get('/edit-coupon', adminAuth, couponController.getEditCouponPage);
+router.post('/update-coupon', adminAuth, couponController.updateCoupon);
+router.post('/save-coupon', adminAuth, couponController.addCoupon);
+router.get('/delete-coupon', adminAuth, couponController.deleteCoupon);
 
+// Admin Dashboard Route
+// router.get('/dashboard',dashboardController.getDashboardData);
 
 
 //sales report

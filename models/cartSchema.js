@@ -13,6 +13,8 @@ const cartSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Product",
         required: true,
+        index: true, // Index for optimizing product lookups within cart
+
       },
       quantity: {
         type: Number,
@@ -29,6 +31,8 @@ const cartSchema = new Schema({
       status: {
         type: String,
         default: "Placed",
+        index: true, // Index for faster filtering by order status
+
       },
       cancellationReason: {
         type: String,

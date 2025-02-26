@@ -1,10 +1,250 @@
-<%- include("../../views/partials/admin/header") %>
-<section class="content-main">
-    <div class="content-header">
-        <div>
-            <h2 class="content-title card-title">Dashboard </h2>
+<%- include('../partials/admin/header') %>
+
+<div class="container-fluid mt-4">
+    <!-- Dashboard Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Dashboard Overview</h2>
+        <div class="filter-controls">
+            <select class="form-select" id="timeRangeFilter">
+                <option value="yearly">Yearly</option>
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+            </select>
         </div>
-       
     </div>
-</section>
-<%- include("../../views/partials/admin/footer") %>
+
+    <!-- Stats Cards Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted">Total Sales</h6>
+                            <h3 class="mb-0">₹<%= salesData.totalSalesAmount.toLocaleString() %></h3>
+                        </div>
+                        <div class="rounded-circle bg-primary p-3">
+                            <i class="material-icons text-white">Sales</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted">Total Orders</h6>
+                            <h3 class="mb-0"><%= count %></h3>
+                        </div>
+                        <div class="rounded-circle bg-success p-3">
+                            <i class="material-icons text-white">Orders</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted">Top Product</h6>
+                            <h3 class="mb-0"><%= products[0]?.productName || 'N/A' %></h3>
+                        </div>
+                        <div class="rounded-circle bg-info p-3">
+                            <i class="material-icons text-white">Product</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted">Top Category</h6>
+                            <h3 class="mb-0"><%= categories[0]?.categoryName || 'N/A' %></h3>
+                        </div>
+                        <div class="rounded-circle bg-warning p-3">
+                            <i class="material-icons text-white">category</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Chart -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Sales Overview</h4>
+            <canvas id="salesChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- Top Items Grid -->
+    <div class="row">
+        <!-- Top Products -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="material-icons align-middle"></i>
+                        Top Products
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% products.forEach(product => { %>
+                                <tr>
+                                    <td><%= product.productName %></td>
+                                    <td><%= product.totalQuantitySold %></td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Categories -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="material-icons align-middle"></i>
+                        Top Categories
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Quantity Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% categories.forEach(category => { %>
+                                <tr>
+                                    <td><%= category.categoryName %></td>
+                                    <td><%= category.totalQuantitySold %></td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Brands -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="material-icons align-middle"></i>
+                        Top Brands
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Brand</th>
+                                    <th>Quantity Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% brands.forEach(brand => { %>
+                                <tr>
+                                    <td><%= brand._id %></td>
+                                    <td><%= brand.totalQuantitySold %></td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Required Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize sales data from your controller
+    const salesData = {
+        yearly: {
+            labels: '<%- JSON.stringify(salesData.yearly.labels) %>',
+            data: '<%- JSON.stringify(salesData.yearly.data) %>'
+        },
+        monthly: {
+            labels: '<%- JSON.stringify(salesData.monthly.labels) %>',
+            data:'<%- JSON.stringify(salesData.monthly.data) %>'
+        },
+        weekly: {
+            labels: '<%- JSON.stringify(salesData.weekly.labels) %>',
+            data: '<%- JSON.stringify(salesData.weekly.data) %>'
+        }
+    };
+
+    // Initialize Chart
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    let salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: salesData.yearly.labels,
+            datasets: [{
+                label: 'Sales',
+                data: salesData.yearly.data,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₹' + context.raw.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Handle time range filter changes
+    document.getElementById('timeRangeFilter').addEventListener('change', function(e) {
+        const selectedRange = e.target.value;
+        salesChart.data.labels = salesData[selectedRange].labels;
+        salesChart.data.datasets[0].data = salesData[selectedRange].data;
+        salesChart.update();
+    });
+});
+</script>
+
+<%- include('../partials/admin/footer') %>

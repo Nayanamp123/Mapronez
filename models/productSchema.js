@@ -6,6 +6,7 @@ const productSchema = new Schema(
     productName: {
       type: String,
       required: true,
+      index: true // Index for faster product searches
     },
     description: {
       type: String,
@@ -14,11 +15,15 @@ const productSchema = new Schema(
     brand: {
       type: String,
       required: true,
+      index: true // Index for filtering products by brand
+
     },
     category: {
       type: Schema.Types.ObjectId,
       ref: "Category",
       required: true,
+      index: true // Index for category-based lookups
+
     },
     regularPrice: {
       type: Number,
@@ -53,19 +58,25 @@ const productSchema = new Schema(
       enum: ["Available", "Out of stock", "Discontinued"],
       required: true,
       default: "Available",
+      index: true // Index for efficient filtering by status
+
     },
     popularity: {
       type: Number,
       default: 0,
+      index: true // Index for sorting products by popularity
+
     },
       rating: {
       type: Number,
       default: 0,
       min: 0,
       max: 5,
+      index: true // Index for sorting by rating
+
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Product = mongoose.model("Product", productSchema)

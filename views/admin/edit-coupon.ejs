@@ -1,0 +1,190 @@
+<%- include('../partials/admin/header') %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Edit Coupon</h2>
+            <p>Modify existing coupon details</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mx-auto">
+                    <form action="/admin/update-coupon" method="post" onsubmit="return validateCouponForm()">
+                        <input type="hidden" id="couponId" name="couponId" value="<%= coupon._id %>">
+                        
+                        <div class="mb-4">
+                            <label for="couponCode" class="form-label">Coupon Code</label>
+                            <input type="text" class="form-control" id="couponCode" name="couponCode" 
+                                   value="<%= coupon.name %>" required/>
+                            <small id="codeError" style="color: red; display: none;">Code is required</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Discount Percentage (%)</label>
+                            <input type="number" class="form-control" id="discountPercentage" 
+                                   name="discountPercentage" value="<%= coupon.offerPercentage %>" required/>
+                            <small id="discountError" style="color: red; display: none;">
+                                Discount percentage must be between 1 and 100
+                            </small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Minimum Price</label>
+                            <input type="number" class="form-control" id="minimumPrice" 
+                                   name="minimumPrice" value="<%= coupon.minimumPrice %>" required/>
+                            <small id="minimumError" style="color: red; display: none;">
+                                Minimum price can't be empty
+                            </small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Created On</label>
+                            <input type="date" class="form-control" id="createdDate" 
+                                   name="createdDate" value="<%= coupon.createdOn.toISOString().split('T')[0] %>" required/>
+                            <small id="createdError" style="color: red; display: none;">
+                                Created date is required
+                            </small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="endDate" 
+                                   name="endDate" value="<%= coupon.expireOn.toISOString().split('T')[0] %>" required/>
+                            <small id="endDateError" style="color: red; display: none;">
+                                End date is required
+                            </small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" type="submit">Update Coupon</button>
+                            <a href="/admin/coupons" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function validateCouponForm() {
+    let isValid = true;
+
+    // Get all form elements
+    const couponCode = document.getElementById("couponCode");
+    const discountPercentage = document.getElementById("discountPercentage");
+    const minimumPrice = document.getElementById("minimumPrice");
+    const createdDate = document.getElementById("createdDate");
+    const endDate = document.getElementById("endDate");
+
+    // Reset all error messages
+    document.querySelectorAll("small[id$='Error']").forEach(el => el.style.display = "none");
+
+    // Validate Coupon Code
+    if (!couponCode.value.trim()) {
+        document.getElementById("codeError").textContent = "Coupon code is required";
+        document.getElementById("codeError").style.display = "block";
+        isValid = false;
+    } else if (couponCode.value.includes(' ')) {
+        document.getElementById("codeError").textContent = "Spaces are not allowed in coupon code";
+        document.getElementById("codeError").style.display = "block";
+        isValid = false;
+    }
+
+    // Validate Discount Percentage
+    const discountValue = parseInt(discountPercentage.value, 10);
+    if (!discountPercentage.value.trim()) {
+        document.getElementById("discountError").textContent = "Discount percentage is required";
+        document.getElementById("discountError").style.display = "block";
+        isValid = false;
+    } else if (discountValue < 1 || discountValue > 100) {
+        document.getElementById("discountError").textContent = "Discount must be between 1 and 100";
+        document.getElementById("discountError").style.display = "block";
+        isValid = false;
+    }
+
+    // Validate Minimum Price
+    if (!minimumPrice.value.trim()) {
+        document.getElementById("minimumError").textContent = "Minimum price is required";
+        document.getElementById("minimumError").style.display = "block";
+        isValid = false;
+    } else if (minimumPrice.value <= 0) {
+        document.getElementById("minimumError").textContent = "Minimum price must be greater than 0";
+        document.getElementById("minimumError").style.display = "block";
+        isValid = false;
+    }
+
+    // Date Validations
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
+    
+    const startDate = new Date(createdDate.value);
+    const expiryDate = new Date(endDate.value);
+    
+    // Validate Created Date
+    if (!createdDate.value) {
+        document.getElementById("createdError").textContent = "Start date is required";
+        document.getElementById("createdError").style.display = "block";
+        isValid = false;
+    }
+
+    // Validate End Date
+    if (!endDate.value) {
+        document.getElementById("endDateError").textContent = "End date is required";
+        document.getElementById("endDateError").style.display = "block";
+        isValid = false;
+    }
+
+    // Validate Date Range
+    if (createdDate.value && endDate.value) {
+        if (expiryDate <= startDate) {
+            document.getElementById("endDateError").textContent = "End date must be after the start date";
+            document.getElementById("endDateError").style.display = "block";
+            isValid = false;
+        }
+    }
+
+    return isValid;
+}
+
+// Add event listeners for real-time validation
+document.addEventListener('DOMContentLoaded', function() {
+    const couponCode = document.getElementById("couponCode");
+    const createdDate = document.getElementById("createdDate");
+    const endDate = document.getElementById("endDate");
+
+    // Prevent spaces in coupon code
+    couponCode.addEventListener('input', function(e) {
+        this.value = this.value.replace(/\s/g, '');
+    });
+
+    // Set min date for created date as today
+    const today = new Date().toISOString().split('T')[0];
+    createdDate.setAttribute('min', today);
+
+    // Update end date min attribute when start date changes
+    createdDate.addEventListener('change', function() {
+        if (this.value) {
+            endDate.setAttribute('min', this.value);
+            // If end date is before new start date, clear it
+            if (endDate.value && new Date(endDate.value) <= new Date(this.value)) {
+                endDate.value = '';
+            }
+        }
+    });
+});
+
+// Function to check if coupon is currently valid
+function isCouponValid(startDate, endDate) {
+    const currentDate = new Date();
+    const couponStart = new Date(startDate);
+    const couponEnd = new Date(endDate);
+    
+    return currentDate >= couponStart && currentDate <= couponEnd;
+}
+</script>
+
+<%- include('../partials/admin/footer') %>

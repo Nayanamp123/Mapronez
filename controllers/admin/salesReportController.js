@@ -73,6 +73,7 @@ const getSalesReport = async (req, res) => {
 
 // Handle export data requests
 const getExportData = async (req, res) => {
+    
     try {
         let dateFilter = { status: "Delivered" };
         if (req.query.startDate && req.query.endDate) {

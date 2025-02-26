@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Your Brand</title>
+    <title>Login | MapRoneZ</title>
+    <link rel="shortcut icon" type="image/x-icon" href="evara-frontend/assets/imgs/theme/mp-perfume-logo-2.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
@@ -267,7 +268,7 @@
 
         <% if (typeof message !== 'undefined' && message && message.length>0) { %>
             <div class="alert <%= message.type === 'error' ? 'alert-error' : 'alert-success' %>">
-                <%= message.text %>
+                <%= message %>
             </div>
         <% } %>
 

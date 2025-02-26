@@ -1,19 +1,19 @@
 <%- include('../partials/admin/header') %>
 
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4>Sales Report</h4>
-            <div class="export-buttons">
-                <button class="btn btn-primary me-2" onclick="exportToPDF()">
-                    <i class="material-icons md-file_download"></i> Export PDF
-                </button>
-                <button class="btn btn-success" onclick="exportToExcel()">
-                    <i class="material-icons md-file_download"></i> Export Excel
-                </button>
-            </div>
+
+
+<div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>Sales Report</h4>
+        <div class="export-buttons">
+            <button class="btn btn-primary me-2" onclick="exportToPDF()">
+                <i class="material-icons md-file_download"></i> Export PDF
+            </button>
+            <button class="btn btn-success" onclick="exportToExcel()">
+                <i class="material-icons md-file_download"></i> Export Excel
+            </button>
         </div>
-
-
+    </div>
 
         <div class="d-flex justify-content-around">
             <!-- Replace the first div with this -->
@@ -274,100 +274,168 @@
 
     // Export functions
     function exportToPDF() {
-        // Get current filter parameters
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        
-        // Fetch filtered data from server
-        fetch(`/admin/export-sales-data?startDate=${startDate}&endDate=${endDate}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
+    // Get current filter parameters
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;        
+    
+    // Fetch filtered data from server
+    fetch(`/admin/export-sales-data?startDate=${startDate}&endDate=${endDate}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Page settings
+                const pageWidth = doc.internal.pageSize.width;
+                const pageHeight = doc.internal.pageSize.height;
+                const margin = 14;
+                
+                // Logo settings
+                const logoWidth = 40;
+                const logoHeight = 40;
+                const logoX = (pageWidth - logoWidth) / 2; // Center horizontally
+                const logoY = margin;
+                
+                // Add logo
+                doc.text('MapRoneZ', 14, 20);
+                doc.addImage('/evara-backend/assets/imgs/theme/mp-perfume-logo-2.jpg', 'JPEG', logoX, logoY, logoWidth, logoHeight);
+                
+                // Add title - centered below logo
+                doc.setFontSize(18);
+                doc.setFont(undefined, 'bold');
+                const titleY = logoY + logoHeight + 10;
+                const title = 'Sales Report';
+                const titleWidth = doc.getStringUnitWidth(title) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                const titleX = (pageWidth - titleWidth) / 2;
+                doc.text(title, titleX, titleY);
+                
+                // Add date - below title
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'normal');
+                const dateText = `Generated on: ${new Date().toLocaleDateString()}`;
+                const dateY = titleY + 10;
+                doc.text(dateText, margin, dateY);
+                
+                // Add summary
+                let yPosition = dateY + 15;
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.text('Sales Summary:', margin, yPosition);
+                
+                // Add summary details
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'normal');
+                yPosition += 10;
+                Object.entries(data.summary).forEach(([key, value]) => {
+                    const title = key.replace(/([A-Z])/g, ' $1').trim();
+                    const text = `${title}: ${typeof value === 'number' ? 'Rs' + value.toLocaleString() : value}`;
+                    doc.text(text, margin, yPosition);
+                    yPosition += 8;
+                });
+                
+                // Add table
+                yPosition += 10;
+                const tableHeaders = ['User Name', 'Products', 'Quantities', 'Date', 'Discount', 'Final Amount'];
+                const tableData = data.data.map(item => [
+                    item.userName,
+                    item.products,
+                    item.quantities,
+                    item.date,
+                    `Rs.${item.discountAmount.toLocaleString()}`,
+                    `Rs.${item.finalAmount.toLocaleString()}`
+                ]);
+                
+                doc.autoTable({
+                    head: [tableHeaders],
+                    body: tableData,
+                    startY: yPosition,
+                    styles: { fontSize: 10 },
+                    margin: { top: 10, right: margin, bottom: 10, left: margin },
+                    headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+                    alternateRowStyles: { fillColor: [242, 242, 242] }
+                });
+                
+                doc.save('sales-report.pdf');
+            }
+        })
+        .catch(error => {
+            console.error('Error generating PDF:', error);
+            alert('Error generating PDF report');
+        });
+}
 
-                    // Add title and date
-                    doc.setFontSize(18);
-                    doc.text('Sales Report', 14, 20);
-                    doc.setFontSize(12);
-                    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
-
-                    // Add summary
-                    let yPosition = 40;
-                    doc.setFontSize(14);
-                    doc.text('Sales Summary:', 14, yPosition);
-                    
-                    doc.setFontSize(12);
-                    yPosition += 10;
-                    Object.entries(data.summary).forEach(([key, value]) => {
-                        const title = key.replace(/([A-Z])/g, ' $1').trim();
-                        const text = `${title}: ${typeof value === 'number' ? '₹' + value.toLocaleString() : value}`;
-                        doc.text(text, 14, yPosition);
-                        yPosition += 8;
-                    });
-
-                    // Add table
-                    yPosition += 10;
-                    const tableHeaders = ['User Name', 'Products', 'Quantities', 'Date', 'Discount', 'Final Amount'];
-                    const tableData = data.data.map(item => [
-                        item.userName,
-                        item.products,
-                        item.quantities,
-                        item.date,
-                        `₹${item.discountAmount.toLocaleString()}`,
-                        `₹${item.finalAmount.toLocaleString()}`
-                    ]);
-
-                    doc.autoTable({
-                        head: [tableHeaders],
-                        body: tableData,
-                        startY: yPosition,
-                        styles: { fontSize: 10 },
-                    });
-
-                    doc.save('sales-report.pdf');
-                }
-            })
-            .catch(error => {
-                console.error('Error generating PDF:', error);
-                alert('Error generating PDF report');
-            });
-    }
-
-    function exportToExcel() {
-        // Get current filter parameters
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        
-        // Fetch filtered data from server
-        fetch(`/admin/export-sales-data?startDate=${startDate}&endDate=${endDate}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const wb = XLSX.utils.book_new();
-                    
-                    // Convert data to worksheet format
-                    const wsData = data.data.map(item => ({
-                        'User Name': item.userName,
-                        'Products': item.products,
-                        'Quantities': item.quantities,
-                        'Date': item.date,
-                        'Discount Amount': `₹${item.discountAmount}`,
-                        'Final Amount': `₹${item.finalAmount}`
-                    }));
-                    
-                    const ws = XLSX.utils.json_to_sheet(wsData);
-                    XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
-                    
-                    // Save the file
-                    XLSX.writeFile(wb, 'sales-report.xlsx');
-                }
-            })
-            .catch(error => {
-                console.error('Error generating Excel:', error);
-                alert('Error generating Excel report');
-            });
-    }
+function exportToExcel() {
+    // Get current filter parameters
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    // Fetch filtered data from server
+    fetch(`/admin/export-sales-data?startDate=${startDate}&endDate=${endDate}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const wb = XLSX.utils.book_new();
+                
+                // Create summary rows
+                const summaryData = [
+                    ['Sales Report Summary'],
+                    ['Generated Date:', new Date().toLocaleDateString()],
+                    [''],  // Empty row for spacing
+                    ['Total Sales:', `₹${data.summary.totalSales.toLocaleString()}`],
+                    ['Total Orders:', data.summary.totalOrders],
+                    ['Total Discount:', `₹${data.summary.totalDiscount.toLocaleString()}`],
+                    ['Total Customers:', data.summary.totalCustomers],
+                    [''], // Empty row for spacing
+                    [''], // Empty row for spacing
+                    ['Detailed Sales Report'], // Header for detailed data
+                    [''] // Empty row before table headers
+                ];
+                
+                // Convert detailed data to worksheet format
+                const wsData = data.data.map(item => ({
+                    'User Name': item.userName,
+                    'Products': item.products,
+                    'Quantities': item.quantities,
+                    'Date': item.date,
+                    'Discount Amount': `₹${item.discountAmount}`,
+                    'Final Amount': `₹${item.finalAmount}`
+                }));
+                
+                // Create worksheet
+                const ws = XLSX.utils.json_to_sheet(wsData);
+                
+                // Prepend summary data to worksheet
+                XLSX.utils.sheet_add_aoa(ws, summaryData, { origin: 'A1' });
+                
+                // Set column widths
+                const columnWidths = [
+                    { wch: 20 }, // A
+                    { wch: 30 }, // B
+                    { wch: 15 }, // C
+                    { wch: 15 }, // D
+                    { wch: 15 }, // E
+                    { wch: 15 }  // F
+                ];
+                ws['!cols'] = columnWidths;
+                
+                // Add cell styling
+                // Note: Some styling options might be limited due to XLSX limitations
+                ws['A1'] = { v: 'Sales Report Summary', t: 's', s: { font: { bold: true, sz: 14 } } };
+                ws['A10'] = { v: 'Detailed Sales Report', t: 's', s: { font: { bold: true, sz: 12 } } };
+                
+                // Add the worksheet to the workbook
+                XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+                
+                // Save the file
+                XLSX.writeFile(wb, 'sales-report.xlsx');
+            }
+        })
+        .catch(error => {
+            console.error('Error generating Excel:', error);
+            alert('Error generating Excel report');
+        });
+}
 </script>
 
     <%- include('../partials/admin/footer') %>

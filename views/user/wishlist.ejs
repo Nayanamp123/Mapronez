@@ -1,5 +1,48 @@
 <%- include('../partials/user/header') %>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    .add-wishlist {
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    transition: all 0.3s ease;
+}
+
+.add-wishlist:hover {
+    background: #ffe6e6;
+}
+
+.fa-heart {
+    font-size: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: #666;
+}
+
+.fa-heart.active {
+    color: #ff0000;
+}
+
+.add-wishlist:hover .fa-heart {
+    transform: scale(1.1);
+}
+
+/* Animation for heart icon when toggling */
+@keyframes heartPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.fa-heart.active {
+    animation: heartPop 0.3s ease;
+}
+</style>
     <main class="main">
         <div class="page-header breadcrumb-wrap">
             <div class="container">
