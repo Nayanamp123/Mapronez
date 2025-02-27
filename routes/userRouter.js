@@ -164,6 +164,7 @@ router.get('/wishlist', wishlistController.getWishList)
 router.post('/add-to-wishlist', wishlistController.addToWishlist)
 router.post('/remove-wishlist-item', wishlistController.removeItem)
 router.get('/check-wishlist/:productId', wishlistController.checkWishlistStatus);
+router.get('/check-cart/:productId', wishlistController.checkCartStatus);
 
 
 router.get('/search-products', productController.searchProduct);

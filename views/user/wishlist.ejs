@@ -1,48 +1,56 @@
 <%- include('../partials/user/header') %>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<style>
-    .add-wishlist {
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #f5f5f5;
-    transition: all 0.3s ease;
-}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .add-wishlist {
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            transition: all 0.3s ease;
+        }
 
-.add-wishlist:hover {
-    background: #ffe6e6;
-}
+        .add-wishlist:hover {
+            background: #ffe6e6;
+        }
 
-.fa-heart {
-    font-size: 1.5rem;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    color: #666;
-}
+        .fa-heart {
+            font-size: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: #666;
+        }
 
-.fa-heart.active {
-    color: #ff0000;
-}
+        .fa-heart.active {
+            color: #ff0000;
+        }
 
-.add-wishlist:hover .fa-heart {
-    transform: scale(1.1);
-}
+        .add-wishlist:hover .fa-heart {
+            transform: scale(1.1);
+        }
 
-/* Animation for heart icon when toggling */
-@keyframes heartPop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
+        /* Animation for heart icon when toggling */
+        @keyframes heartPop {
+            0% {
+                transform: scale(1);
+            }
 
-.fa-heart.active {
-    animation: heartPop 0.3s ease;
-}
-</style>
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .fa-heart.active {
+            animation: heartPop 0.3s ease;
+        }
+    </style>
     <main class="main">
         <div class="page-header breadcrumb-wrap">
             <div class="container">
@@ -72,71 +80,104 @@
                                     <tbody>
                                         <%for(let i=0;i<products.length;i++){%>
                                             <tr>
-                                                <td class="image product-thumbnail"><img src="/uploads/images/<%=products[i].productId.productImage[0]%>" alt="<%=products[i].productId.productName%>"></td>
+                                                <td class="image product-thumbnail"><img
+                                                        src="/uploads/images/<%=products[i].productId.productImage[0]%>"
+                                                        alt="<%=products[i].productId.productName%>"></td>
                                                 <td class="product-des product-name">
-                                                    <h5 class="product-name"><a href="/productdetails?id=<%=products[i].productId._id%>"><%=products[i].productId.productName%></a></h5>
+                                                    <h5 class="product-name"><a
+                                                            href="/productdetails?id=<%=products[i].productId._id%>">
+                                                            <%=products[i].productId.productName%>
+                                                        </a></h5>
                                                 </td>
-                                                <td class="price" data-title="Price"><span><%=products[i].productId.salePrice.toLocaleString()%></span></td>
-                                                <%if(products[i].productId.quantity > 0){%>
+                                                <td class="price" data-title="Price"><span>
+                                                        <%=products[i].productId.salePrice.toLocaleString()%>
+                                                    </span></td>
+                                                <%if(products[i].productId.quantity> 0){%>
                                                     <td class="text-center" data-title="Stock">
                                                         <span class="color3 font-weight-bold">In Stock</span>
                                                     </td>
                                                     <td class="text-right" data-title="Cart">
-                                                        <form action="/add-to-cart" method="POST" style="display:inline;">
-                                                            <input type="hidden" name="productId" value="<%= products[i].productId._id %>">
-                                                            <button type="submit" class="btn btn-sm btn-success">
+                                                        <form style="display:inline;">
+                                                            <input type="hidden" name="productId"
+                                                                value="<%= products[i].productId._id %>">
+                                                            <button type="button"
+                                                                onclick="checkCart('<%= products[i].productId._id %>')"
+                                                                class="btn btn-sm btn-success">
                                                                 <i class="fi-rs-shopping-bag mr-5"></i>Add to cart
                                                             </button>
                                                         </form>
                                                     </td>
-                                                <%}else{%>
-                                                    <td class="text-center" data-title="Stock">
-                                                        <span class="color3 font-weight-bold">No Stock</span>
-                                                    </td>
-                                                    <td class="text-right" data-title="Cart">
+                                                    <%}else{%>
+                                                        <td class="text-center" data-title="Stock">
+                                                            <span class="color3 font-weight-bold">No Stock</span>
+                                                        </td>
+                                                        <!-- <td class="text-right" data-title="Cart">
                                                         <a href="/contact-us"><button class="btn btn-sm btn-info"><i class="fi-rs-shopping-bag mr-5"></i>Contact Us</button></a>
-                                                    </td>
-                                                <%}%>
-                                                <td class="action" data-title="Remove">
-                                                    <form id="remove-form-<%= products[i].productId._id %>"
-                                                        action="/remove-wishlist-item" method="POST">
-                                                        <input type="hidden" name="productId"
-                                                            value="<%= products[i].productId._id %>">
-                                                        <button type="button" class="btn btn-danger"
-                                                            onclick="confirmRemove('<%= products[i].productId._id %>')">
-                                                            <i class="fi-rs-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </td>
+                                                    </td> -->
+                                                        <%}%>
+                                                            <td class="action" data-title="Remove">
+                                                                <form id="remove-form-<%= products[i].productId._id %>"
+                                                                    action="/remove-wishlist-item" method="POST">
+                                                                    <input type="hidden" name="productId"
+                                                                        value="<%= products[i].productId._id %>">
+                                                                    <button type="button" class="btn btn-danger"
+                                                                        onclick="confirmRemove('<%= products[i].productId._id %>')">
+                                                                        <i class="fi-rs-trash"></i>
+                                                                    </button>
+                                                                </form>
+                                                            </td>
                                             </tr>
-                                        <%}%>
+                                            <%}%>
                                     </tbody>
                                 </table>
-                            <%}else{%>
-                                <h2>No products yet</h2>
-                            <%}%>
+                                <%}else{%>
+                                    <h2>No products yet</h2>
+                                    <%}%>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
-<%- include('../partials/user/footer') %>
+    <%- include('../partials/user/footer') %>
 
-<script>
-    function confirmRemove(productId) {
-            Swal.fire({
-                title: "Are you sure?",
-                text: "Do you want to remove this item from wishlist?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Yes, remove it!"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById(`remove-form-${productId}`).submit();
-                }
-            });
-        }
-</script>
+        <script>
+            function confirmRemove(productId) {
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Do you want to remove this item from wishlist?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Yes, remove it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(`remove-form-${productId}`).submit();
+                    }
+                });
+            }
+
+            function checkCart(productId) {
+                fetch(`/check-cart/${productId}`, {
+                    method: "GET"
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log(data)
+                        if (data.inCart) {
+                            location.href = '/cart'
+                        } else {
+                            fetch(`/add-to-cart?id=${productId}`, {
+                                method: "POST"
+                            })
+                            .then(()=> location.href = '/cart')
+                            .catch(err => console.log(err));
+                        }
+                    }).catch(error => {
+                        console.log(error)
+                    })
+
+            }
+        </script>

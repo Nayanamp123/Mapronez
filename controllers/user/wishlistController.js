@@ -1,5 +1,6 @@
 const Wishlist = require('../../models/wishlistSchema');
 const Product = require('../../models/productSchema');
+const Cart = require("../../models/cartSchema")
 
 const getWishList = async (req, res) => {
     try {
@@ -84,16 +85,45 @@ const removeItem = async (req, res) => {
             { $pull: { products: { productId: productId } } }
         );
 
-        res.status(200).json({ message: "Product removed from wishlist" });
+        res.status(200).redirect('/wishlist');
     } catch (error) {
         console.error("Error removing from wishlist:", error);
         res.status(500).json({ error: "Server error" });
     }
 };
 
+async function checkCartStatus(req, res) {
+    try {
+        const productId = req.params.productId;  
+        const userId = req.session.user; 
+        console.log("ProductId",productId)
+        const cart = await Cart.findOne({userId });
+        console.log("Cart",cart)
+
+        if (cart) {
+           
+            const productInCart = cart.items.find(item => item.productId.toString() === productId);
+            console.log("productInCart",productInCart)
+
+            if (productInCart) {
+                res.json({ inCart: true });
+            } else {
+                res.json({ inCart: false });
+            }
+        } else {
+            // No cart found for the user, hence product is not in the cart
+            res.json({ inCart: false });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+}
+
 module.exports = {
     getWishList,
     addToWishlist,
     removeItem,
-    checkWishlistStatus
+    checkWishlistStatus,
+    checkCartStatus
 };
