@@ -231,13 +231,14 @@ const getCheckout = async (req, res) => {
     res.redirect('/page-not-found');
   }
 };
-// This function ensures proper stock validation before placing an order
+
+
 const placeOrderInitial = async (req, res) => {
   try {
     const userId = req.session.user;
     const { addressId, paymentMethod } = req.body;
     let { cart, singleProduct, coupon, discount } = req.body;
-    singleProduct && (singleProduct = JSON.parse(singleProduct));
+    singleProduct && (singleProduct = JSON.parse(singleProduct))
     
     if (!userId || !addressId || !paymentMethod) {
       return res.status(400).json({
@@ -249,126 +250,38 @@ const placeOrderInitial = async (req, res) => {
     let orderedItems = [];
     let totalPrice = 0;
     let finalPrice = 0;
-    let stockValidationFailed = false;
-    let outOfStockProduct = '';
-
-    // Centralized function to validate product stock
-    const validateProductStock = async (productId, requiredQuantity) => {
-      // Get the full product with all fields
-      const product = await Product.findById(productId);
-      
-      // Debug logging
-      console.log(`Validating product ${productId}:`, {
-        name: product?.productName,
-        quantity: product?.quantity,
-        requiredQuantity,
-        isBlocked: product?.isBlocked,
-        status: product?.status
-      });
-      
-      if (!product) {
-        console.log(`Product ${productId} not found`);
-        outOfStockProduct = 'Product not found';
-        return { valid: false };
-      }
-      
-      if (product.isBlocked) {
-        console.log(`Product ${product.productName} is blocked`);
-        outOfStockProduct = product.productName;
-        return { valid: false };
-      }
-      
-      if (product.status !== "Available" || product.status === "Out of stock") {
-        console.log(`Product ${product.productName} status is ${product.status}`);
-        outOfStockProduct = product.productName;
-        return { valid: false };
-      }
-      
-      if (product.quantity <= 0 || product.quantity < requiredQuantity) {
-        console.log(`Product ${product.productName} has insufficient stock: ${product.quantity} < ${requiredQuantity}`);
-        outOfStockProduct = product.productName;
-        return { valid: false };
-      }
-      
-      return { product, valid: true };
-    };
 
     if (singleProduct) {
-      console.log('Processing single product purchase:', singleProduct);
-      
-      // Validate single product stock
-      const validation = await validateProductStock(singleProduct, 1);
-      if (!validation.valid) {
+      const product = await Product.findById(singleProduct);
+      if (!product || product.isBlocked || product.quantity < 1) {
         return res.status(400).json({
           success: false,
-          message: `Product ${outOfStockProduct} is unavailable or out of stock`
+          message: 'Product is unavailable'
         });
       }
-      
-      const product = validation.product;
       orderedItems.push({
         product: product._id,
         quantity: 1,
         price: product.salePrice
       });
       totalPrice = product.salePrice;
-      
-      // Reserve the stock (decrease quantity)
-      await Product.findByIdAndUpdate(product._id, {
-        $inc: { quantity: -1 },
-        $set: { 
-          status: product.quantity === 1 ? "Out of stock" : "Available"
-        }
-      });
-      
     } else if (cart) {
-      console.log('Processing cart purchase');
-      
-      // Get cart with populated product details
-      const userCart = await Cart.findOne({ userId }).populate({
-        path: 'items.productId',
-        model: 'Product'
-      });
-      
-      if (!userCart || !userCart.items || userCart.items.length === 0) {
-        console.log('Cart is empty');
+      const userCart = await Cart.findOne({ userId }).populate('items.productId');
+      if (!userCart || userCart.items.length === 0) {
         return res.status(400).json({
           success: false,
           message: 'Cart is empty'
         });
       }
 
-      console.log(`Found cart with ${userCart.items.length} items`);
-      
-      // First validate all products before making any changes
-      for (const item of userCart.items) {
-        if (!item.productId || !item.productId._id) {
-          console.log('Invalid item in cart:', item);
-          stockValidationFailed = true;
-          outOfStockProduct = 'Invalid product in cart';
-          break;
-        }
-        
-        console.log(`Validating cart item: ${item.productId.productName}, quantity: ${item.quantity}`);
-        const validation = await validateProductStock(item.productId._id, item.quantity);
-        
-        if (!validation.valid) {
-          stockValidationFailed = true;
-          break;
-        }
-      }
-
-      if (stockValidationFailed) {
-        console.log('Stock validation failed for:', outOfStockProduct);
-        return res.status(400).json({
-          success: false,
-          message: `Product ${outOfStockProduct} is unavailable or insufficient stock`
-        });
-      }
-
-      // Now process the cart items
       for (const item of userCart.items) {
         const product = item.productId;
+        if (!product || product.isBlocked || product.quantity < item.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: `Product ${product?.productName || 'Unknown'} is unavailable`
+          });
+        }
         
         orderedItems.push({
           product: product._id,
@@ -377,19 +290,11 @@ const placeOrderInitial = async (req, res) => {
         });
         totalPrice += item.totalPrice;
         
-        // Update product stock
-        const newQuantity = product.quantity - item.quantity;
-        console.log(`Updating stock for ${product.productName}: ${product.quantity} -> ${newQuantity}`);
-        
         await Product.findByIdAndUpdate(product._id, {
-          $inc: { quantity: -item.quantity },
-          $set: { 
-            status: newQuantity <= 0 ? "Out of stock" : "Available"
-          }
+          $inc: { quantity: -item.quantity }
         });
       }
 
-      // Clear the cart
       await Cart.findOneAndUpdate(
         { userId },
         { $set: { items: [] } }
@@ -424,12 +329,10 @@ const placeOrderInitial = async (req, res) => {
       paymentMethod,
       paymentStatus: 'Pending',
       couponCode: coupon,
-      couponApplied: Boolean(coupon && discount),
-      orderedAt: new Date()
+      couponApplied: Boolean(coupon && discount)
     });
 
     await newOrder.save();
-    console.log('Order created successfully:', newOrder._id);
 
     return res.status(200).json({
       success: true,
@@ -445,6 +348,8 @@ const placeOrderInitial = async (req, res) => {
     });
   }
 };
+
+
 const placeOrder = async (req, res) => {
   try {
     const { orderId, paymentDetails, paymentSuccess } = req.body;
@@ -673,7 +578,7 @@ const applyCoupon = async (req, res) => {
     const startDate = new Date(coupon.createdOn);
     const endDate = new Date(coupon.expireOn);
 
-    if (currentDate < startDate) {
+    if (currentDate > startDate) {
       return res.status(400).json({
         message: 'Coupon not active yet',
         validFrom: startDate
@@ -722,9 +627,7 @@ const applyCoupon = async (req, res) => {
 
 const removeCoupon = async (req, res) => {
   try {
-
     const { totalPrice } = req.body;
-
     const discountAmount = 0;
     const finalTotal = totalPrice;
 
@@ -733,12 +636,15 @@ const removeCoupon = async (req, res) => {
       discountAmount,
       finalTotal,
     });
-
   } catch (error) {
     console.error("Error removing coupon", error);
-    res.status(500);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to remove coupon'
+    });
   }
 }
+
 const returnOrder = async (req, res) => {
   try {
     const { orderId, reason } = req.body;

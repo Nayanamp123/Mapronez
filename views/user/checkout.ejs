@@ -389,12 +389,12 @@
                                     <span id="subtotalDisplay">₹<%= totalWithoutGst.toLocaleString() %></span>
                                 </div>
                                 
-                                <% if (discount && discount > 0) { %>
-                                <div class="d-flex justify-content-between mb-2">
+                                
+                                <div id="discount-row" class="d-flex justify-content-between mb-2">
                                     <span>Discount</span>
-                                    <span class="text-success">-₹<%= discount.toLocaleString() %></span>
+                                    <span class="text-success" id="discountDisplay">-₹<%= discount.toLocaleString() || 0 %></span>
                                 </div>
-                                <% } %>
+                               
                             
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>GST (18%)</span>
@@ -458,7 +458,7 @@
                                 <!-- Hidden Fields -->
                                 <input type="hidden" name="cart" value='<%= JSON.stringify(cart ? cart.items : []) %>'>
                                 <input type="hidden" name="totalPrice" value="<%= totalPrice %>">
-                                <input type="hidden" name="finalPrice" id="finalPrice" value="<%= totalPrice %>">
+                                <input type="hidden" name="finalPrice" id="finalPrice" value="<%= totalWithGst %>">
                                 <input type="hidden" name="discount" id="discount">
                                 <input type="hidden" name="coupon" id="coupon">
                                 <% if (product) { %>
@@ -739,99 +739,106 @@
 
 
         async function applyCoupon() {
-            const couponCodeInput = document.getElementById('couponCode');
-            const totalPriceElement = document.getElementById('finalPrice');
-            const discountRow = document.getElementById('discount-row');
-            const applyCouponBtn = document.getElementById('applyCouponBtn');
-            const removeCouponBtn = document.getElementById('removeCouponBtn');
+    const couponCodeInput = document.getElementById('couponCode');
+    const totalPriceElement = document.getElementById('finalPrice');
+    const discountRow = document.getElementById('discount-row');
+    const applyCouponBtn = document.getElementById('applyCouponBtn');
+    const removeCouponBtn = document.getElementById('removeCouponBtn');
+    
+    // Get the actual subtotal without GST
+    const subtotalElement = document.getElementById('subtotalDisplay');
+    const subtotalText = subtotalElement ? subtotalElement.textContent : '';
+    const subtotalValue = parseFloat(subtotalText.replace('₹', '').replace(/,/g, ''));
+    
+    if (!couponCodeInput || !totalPriceElement) {
+        Swal.fire({
+            text: "Something went wrong. Please refresh the page and try again.",
+            icon: "error"
+        });
+        return;
+    }
 
-            if (!couponCodeInput || !totalPriceElement || !discountRow) {
-                Swal.fire({
-                    text: "Something went wrong. Please refresh the page and try again.",
-                    icon: "error"
-                });
-                return;
-            }
+    const couponCode = couponCodeInput.value.trim();
+    if (!couponCode) {
+        Swal.fire({
+            text: "Please enter a coupon code",
+            icon: "warning"
+        });
+        return;
+    }
 
-            const couponCode = couponCodeInput.value.trim();
-            if (!couponCode) {
-                Swal.fire({
-                    text: "Please enter a coupon code",
-                    icon: "warning"
-                });
-                return;
-            }
+    // Use the total with GST for the coupon application
+    let originalPrice = parseFloat(totalPriceElement.value);
+    if (isNaN(originalPrice)) {
+        Swal.fire({
+            text: "Invalid price value",
+            icon: "error"
+        });
+        return;
+    }
 
-            let originalPrice = parseFloat(totalPriceElement.value);
-            if (isNaN(originalPrice)) {
-                Swal.fire({
-                    text: "Invalid price value",
-                    icon: "error"
-                });
-                return;
-            }
+    try {
+        const response = await fetch('/apply-coupon', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ couponCode, totalPrice: originalPrice })
+        });
 
-            try {
-                const response = await fetch('/apply-coupon', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ couponCode, totalPrice: originalPrice })
-                });
-
-                // if (!response.ok) {
-                //     throw new Error(`HTTP error! status: ${response.status}`);
-                // }
-
-                const result = await response.json();
-
-                if (result.success) {
-                    if (!totalPriceElement.hasAttribute('data-original-price')) {
-                        totalPriceElement.setAttribute('data-original-price', originalPrice);
-                    }
-
-                    discountRow.classList.remove('d-none');
-
-                    if (removeCouponBtn) removeCouponBtn.classList.remove('d-none');
-                    if (applyCouponBtn) applyCouponBtn.classList.add('d-none');
-
-                    const discountAmount = parseFloat(result.discountAmount);
-                    const finalTotal = originalPrice - discountAmount;
-
-                    updateDisplays({
-                        subtotal: originalPrice,
-                        discount: discountAmount,
-                        final: finalTotal
-                    });
-
-                    totalPriceElement.value = finalTotal;
-
-                    Swal.fire({
-                        text: "Coupon applied successfully!",
-                        icon: "success"
-                    });
-                } else {
-                    Swal.fire({
-                        text: result.message || "Invalid coupon code",
-                        icon: "error"
-                    });
-
-                    resetCouponState(originalPrice);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                Swal.fire({
-                    text: "Failed to apply the coupon",
-                    icon: "error"
-                });
-                resetCouponState(originalPrice);
-            }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const result = await response.json();
+
+        if (result.success) {
+            if (!totalPriceElement.hasAttribute('data-original-price')) {
+                totalPriceElement.setAttribute('data-original-price', originalPrice);
+            }
+
+            discountRow.classList.remove('d-none');
+
+            if (removeCouponBtn) removeCouponBtn.classList.remove('d-none');
+            if (applyCouponBtn) applyCouponBtn.classList.add('d-none');
+
+            const discountAmount = parseFloat(result.discountAmount);
+            const finalTotal = originalPrice - discountAmount;
+
+            // Keep the original subtotal, but update discount and final total
+            updateDisplays({
+                subtotal: subtotalValue, // Keep the original subtotal without GST
+                discount: discountAmount,
+                final: finalTotal
+            });
+
+            totalPriceElement.value = finalTotal;
+
+            Swal.fire({
+                text: "Coupon applied successfully!",
+                icon: "success"
+            });
+        } else {
+            Swal.fire({
+                text: result.message || "Invalid coupon code",
+                icon: "error"
+            });
+
+            resetCouponState(originalPrice);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            text: "Failed to apply the coupon",
+            icon: "error"
+        });
+        resetCouponState(originalPrice);
+    }
+}
 
         function updateDisplays({ subtotal, discount, final }) {
             const elements = {
                 subtotal: document.getElementById('subtotalDisplay'),
                 discount: document.getElementById('discountDisplay'),
-                final: document.getElementById('finalTotalDisplay')
+                final: document.getElementById('totalDisplay')
             };
 
             if (elements.subtotal) elements.subtotal.textContent = `₹${subtotal.toLocaleString()}`;
@@ -840,73 +847,56 @@
         }
 
         async function removeCoupon() {
-            const totalPriceElement = document.getElementById('finalPrice');
-            const discountRow = document.getElementById('discount-row');
-            const applyCouponBtn = document.getElementById('applyCouponBtn');
-            const removeCouponBtn = document.getElementById('removeCouponBtn');
-            const couponCodeInput = document.getElementById('couponCode');
+    const totalPriceElement = document.getElementById('finalPrice');
+    const discountRow = document.getElementById('discount-row');
+    const applyCouponBtn = document.getElementById('applyCouponBtn');
+    const removeCouponBtn = document.getElementById('removeCouponBtn');
+    const couponCodeInput = document.getElementById('couponCode');
+    
+    // Get the actual subtotal without GST (same as in applyCoupon)
+    const subtotalElement = document.getElementById('subtotalDisplay');
+    const subtotalText = subtotalElement ? subtotalElement.textContent : '';
+    const subtotalValue = parseFloat(subtotalText.replace('₹', '').replace(/,/g, ''));
 
-            if (!totalPriceElement || !discountRow) {
-                Swal.fire({
-                    text: "Something went wrong. Please refresh the page and try again.",
-                    icon: "error"
-                });
-                return;
-            }
+    if (!totalPriceElement || !discountRow) {
+        Swal.fire({
+            text: "Something went wrong. Please refresh the page and try again.",
+            icon: "error"
+        });
+        return;
+    }
 
-            const originalPrice = parseFloat(totalPriceElement.getAttribute('data-original-price'));
-            if (isNaN(originalPrice)) {
-                Swal.fire({
-                    text: "Original price not found",
-                    icon: "error"
-                });
-                return;
-            }
+    const originalPrice = parseFloat(totalPriceElement.getAttribute('data-original-price'));
+    if (isNaN(originalPrice)) {
+        Swal.fire({
+            text: "Original price not found",
+            icon: "error"
+        });
+        return;
+    }
 
-            try {
-                const response = await fetch('/remove-coupon', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ totalPrice: originalPrice })
-                });
+    try {
+        const response = await fetch('/remove-coupon', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ totalPrice: originalPrice })
+        });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-
-                if (result.success) {
-                    resetCouponState(originalPrice);
-
-                    Swal.fire({
-                        text: "Coupon removed successfully",
-                        icon: "success"
-                    });
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                Swal.fire({
-                    text: "Failed to remove the coupon",
-                    icon: "error"
-                });
-            }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        function resetCouponState(originalPrice) {
-            const discountRow = document.getElementById('discount-row');
-            const applyCouponBtn = document.getElementById('applyCouponBtn');
-            const removeCouponBtn = document.getElementById('removeCouponBtn');
-            const couponCodeInput = document.getElementById('couponCode');
-            const totalPriceElement = document.getElementById('finalPrice');
+        const result = await response.json();
 
+        if (result.success) {
+            // Keep the correct subtotal value when resetting
             if (discountRow) discountRow.classList.add('d-none');
 
             if (removeCouponBtn) removeCouponBtn.classList.add('d-none');
             if (applyCouponBtn) applyCouponBtn.classList.remove('d-none');
 
             updateDisplays({
-                subtotal: originalPrice,
+                subtotal: subtotalValue, // Keep the original subtotal without GST
                 discount: 0,
                 final: originalPrice
             });
@@ -917,7 +907,52 @@
                 totalPriceElement.value = originalPrice;
                 totalPriceElement.removeAttribute('data-original-price');
             }
+
+            Swal.fire({
+                text: "Coupon removed successfully",
+                icon: "success"
+            });
         }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            text: "Failed to remove the coupon",
+            icon: "error"
+        });
+    }
+}
+
+// Update the resetCouponState function too
+function resetCouponState(originalPrice) {
+    const discountRow = document.getElementById('discount-row');
+    const applyCouponBtn = document.getElementById('applyCouponBtn');
+    const removeCouponBtn = document.getElementById('removeCouponBtn');
+    const couponCodeInput = document.getElementById('couponCode');
+    const totalPriceElement = document.getElementById('finalPrice');
+    
+    // Get the actual subtotal without GST
+    const subtotalElement = document.getElementById('subtotalDisplay');
+    const subtotalText = subtotalElement ? subtotalElement.textContent : '';
+    const subtotalValue = parseFloat(subtotalText.replace('₹', '').replace(/,/g, ''));
+
+    if (discountRow) discountRow.classList.add('d-none');
+
+    if (removeCouponBtn) removeCouponBtn.classList.add('d-none');
+    if (applyCouponBtn) applyCouponBtn.classList.remove('d-none');
+
+    updateDisplays({
+        subtotal: subtotalValue, // Keep the original subtotal without GST
+        discount: 0,
+        final: originalPrice
+    });
+
+    if (couponCodeInput) couponCodeInput.value = '';
+
+    if (totalPriceElement) {
+        totalPriceElement.value = originalPrice;
+        totalPriceElement.removeAttribute('data-original-price');
+    }
+}
 
     </script>
 
