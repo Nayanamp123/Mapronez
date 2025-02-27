@@ -578,7 +578,7 @@ const applyCoupon = async (req, res) => {
     const startDate = new Date(coupon.createdOn);
     const endDate = new Date(coupon.expireOn);
 
-    if (currentDate > startDate) {
+    if (currentDate < startDate) {
       return res.status(400).json({
         message: 'Coupon not active yet',
         validFrom: startDate
